@@ -1,6 +1,6 @@
 {
   "name": "360gantt",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Dell asset lifecycle Gantt visualizer — client-side, GitHub Pages ready",
   "private": true,
   "scripts": {
