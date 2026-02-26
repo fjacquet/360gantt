@@ -9,7 +9,7 @@ export interface Filters {
   search: string
 }
 
-/** Zoom presets from widest (index 0) to finest (index 3) */
+/** Time-axis zoom presets (widest → finest) */
 export interface ZoomScale {
   unit: string
   step: number
@@ -35,8 +35,10 @@ export const ZOOM_PRESETS: { label: string; scales: ZoomScale[] }[] = [
   },
 ]
 
-/** Default zoom: quarterly view (index 2) */
-const DEFAULT_ZOOM = 2
+/** Visual scale steps: CSS zoom applied to the whole Gantt canvas */
+export const SCALE_STEPS = [0.5, 0.67, 0.75, 0.9, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0]
+const DEFAULT_SCALE_IDX = 4 // 1.0 = 100%
+const DEFAULT_ZOOM_IDX = 2  // Quarter
 
 interface AssetState {
   loading: boolean
@@ -46,8 +48,10 @@ interface AssetState {
   filters: Filters
   totalAssets: number
   fileName: string | null
-  /** Current index into ZOOM_PRESETS */
+  /** Current index into ZOOM_PRESETS (time axis) */
   zoomLevel: number
+  /** Current index into SCALE_STEPS (visual CSS zoom) */
+  scaleIdx: number
 
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
@@ -56,6 +60,8 @@ interface AssetState {
   setZoom: (level: number) => void
   zoomIn: () => void
   zoomOut: () => void
+  scaleUp: () => void
+  scaleDown: () => void
   reset: () => void
 }
 
@@ -67,7 +73,8 @@ const initialState = {
   filters: { locationIds: [], search: '' },
   totalAssets: 0,
   fileName: null,
-  zoomLevel: DEFAULT_ZOOM,
+  zoomLevel: DEFAULT_ZOOM_IDX,
+  scaleIdx: DEFAULT_SCALE_IDX,
 }
 
 export const useAssetStore = create<AssetState>()((set, get) => ({
@@ -93,6 +100,16 @@ export const useAssetStore = create<AssetState>()((set, get) => ({
   zoomOut: () => {
     const { zoomLevel } = get()
     set({ zoomLevel: Math.max(0, zoomLevel - 1) })
+  },
+
+  scaleUp: () => {
+    const { scaleIdx } = get()
+    set({ scaleIdx: Math.min(SCALE_STEPS.length - 1, scaleIdx + 1) })
+  },
+
+  scaleDown: () => {
+    const { scaleIdx } = get()
+    set({ scaleIdx: Math.max(0, scaleIdx - 1) })
   },
 
   reset: () => set(initialState),
