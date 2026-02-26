@@ -19,11 +19,17 @@ function expandForCapture(el: HTMLElement): () => void {
 
   // Release the wrapper from position:absolute + inset:0 + height:100%
   // so that scrollHeight reflects content height, not viewport height.
+  // Pin the offsetWidth explicitly: without this, switching from
+  // position:absolute+inset:0 (width from inset) to position:relative
+  // causes the container to lose its width, which collapses SVAR's
+  // internal left-column panel behind the bar chart.
+  const prevElWidth = el.style.width
   const prevElHeight = el.style.height
   const prevElMinHeight = el.style.minHeight
   const prevElPosition = el.style.position
   const prevElInset = el.style.inset
   const prevElOverflow = el.style.overflow
+  el.style.width = `${el.offsetWidth}px`
   el.style.height = 'auto'
   el.style.minHeight = '0'
   el.style.position = 'relative'
@@ -68,6 +74,7 @@ function expandForCapture(el: HTMLElement): () => void {
 
   return () => {
     style.zoom = prevZoom
+    el.style.width = prevElWidth
     el.style.height = prevElHeight
     el.style.minHeight = prevElMinHeight
     el.style.position = prevElPosition
