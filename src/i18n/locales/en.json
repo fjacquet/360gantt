@@ -1,0 +1,34 @@
+{
+  "app": {
+    "title": "360gantt",
+    "subtitle": "Asset Lifecycle Visualizer"
+  },
+  "header": {
+    "exportPdf": "Export PDF",
+    "exportPptx": "Export PPTX",
+    "loadSample": "Load Sample"
+  },
+  "dropzone": {
+    "title": "Drop your Dell asset CSV here",
+    "subtitle": "or click to browse — supports EN, FR, IT, DE exports",
+    "loading": "Parsing…"
+  },
+  "filter": {
+    "title": "Filters",
+    "search": "Search products…",
+    "locations": "Locations",
+    "allLocations": "All locations",
+    "clear": "Clear filters"
+  },
+  "gantt": {
+    "noData": "Load a CSV file to see the Gantt chart",
+    "assets": "assets",
+    "locations": "locations"
+  },
+  "status": {
+    "ok": "On contract (2+ years)",
+    "warning": "Renew soon (1–2 years)",
+    "critical": "Urgent renewal (< 1 year)",
+    "expired": "Expired"
+  }
+}
