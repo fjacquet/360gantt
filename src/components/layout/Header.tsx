@@ -1,7 +1,9 @@
-import type { RefObject } from 'react'
+import { type RefObject, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ZOOM_PRESETS, SCALE_STEPS, useAssetStore } from '@store/assetStore'
 import { useExport } from '@hooks/useExport'
+import { CsvDropzone } from '@components/inputs/CsvDropzone'
+import { FilterPanel } from '@components/inputs/FilterPanel'
 import i18n from '@/i18n/config'
 
 interface HeaderProps {
@@ -10,10 +12,12 @@ interface HeaderProps {
 
 export function Header({ ganttRef }: HeaderProps) {
   const { t } = useTranslation()
-  const { ganttData, totalAssets, locationGroups, fileName, zoomLevel, zoomIn, zoomOut, scaleIdx, scaleUp, scaleDown } =
+  const { ganttData, totalAssets, locationGroups, zoomLevel, zoomIn, zoomOut, scaleIdx, scaleUp, scaleDown } =
     useAssetStore()
   const { exportPng, exportPdf, exportPptx } = useExport(ganttRef)
   const hasData = ganttData.tasks.length > 0
+  const [filterOpen, setFilterOpen] = useState(false)
+  const filterRef = useRef<HTMLDivElement>(null)
 
   const LANGS = ['en', 'fr', 'it', 'de'] as const
   const currentLang = LANGS.find((l) => i18n.language.startsWith(l)) ?? 'en'
@@ -28,20 +32,47 @@ export function Header({ ganttRef }: HeaderProps) {
   const canScaleDown = scaleIdx > 0
 
   return (
-    <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+    <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-2 shadow-sm dark:border-gray-700 dark:bg-gray-900">
       <div className="flex items-center gap-3">
         <div>
-          <h1 className="text-lg font-bold leading-none text-blue-700 dark:text-blue-400">
+          <h1 className="text-base font-bold leading-none text-blue-700 dark:text-blue-400">
             {t('app.title')}
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">{t('app.subtitle')}</p>
         </div>
+
+        {/* File upload — always visible */}
+        <CsvDropzone compact />
+
+        {/* Stats + filter when data is loaded */}
         {hasData && (
-          <div className="ml-4 hidden text-xs text-gray-500 sm:block dark:text-gray-400">
-            {fileName && <span className="font-medium">{fileName}</span>}
-            {' · '}
-            {totalAssets} {t('gantt.assets')} · {locationGroups.length} {t('gantt.locations')}
-          </div>
+          <>
+            <span className="hidden text-xs text-gray-500 sm:block dark:text-gray-400">
+              {totalAssets} {t('gantt.assets')} · {locationGroups.length} {t('gantt.locations')}
+            </span>
+
+            {/* Filter dropdown */}
+            <div ref={filterRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setFilterOpen((v) => !v)}
+                className="flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                </svg>
+                {t('filter.locations')}
+                <svg className={`h-3 w-3 transition-transform ${filterOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {filterOpen && (
+                <div className="absolute left-0 top-full z-50 mt-1 w-72 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                  <FilterPanel />
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 

@@ -41,7 +41,7 @@ export function toGanttData(locationGroups: LocationGroup[]): GanttData {
         end: group.groupEnd,
         type: 'summary',
         parent: locationId,
-        open: false,
+        open: true,
       })
 
       for (const asset of group.assets) {

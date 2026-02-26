@@ -11,6 +11,13 @@ body,
   margin: 0;
 }
 
+/* SVAR Willow/WillowDark theme wrapper must fill its container
+   so the Gantt component can measure a bounded height and enable
+   internal scrolling instead of rendering all rows at full height. */
+.wx-theme {
+  height: 100%;
+}
+
 body {
   font-family:
     Inter,

@@ -40,8 +40,9 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
       ref={ref}
       className={className}
       style={{
-        height: '100%',
-        minHeight: 0,
+        position: 'absolute',
+        inset: 0,
+        overflow: 'hidden',
         zoom: cssZoom,
         // Override SVAR CSS variables for a compact, readable density
         '--wx-font-size': '12px',
