@@ -6,7 +6,7 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   // Base path for GitHub Pages deployment (https://fjacquet.github.io/360gantt/)
-  base: '/360gantt/',
+  base: process.env.VITE_BASE ?? '/360gantt/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

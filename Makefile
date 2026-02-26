@@ -1,4 +1,7 @@
-.PHONY: help install dev build preview typecheck lint lint-fix format test test-ui test-coverage ci clean
+.PHONY: help install dev build preview typecheck lint lint-fix format test test-ui test-coverage ci docker docker-run release clean
+
+IMAGE ?= 360gantt
+VERSION ?= $(shell node -p "require('./package.json').version")
 
 # Default target
 help:
@@ -21,6 +24,11 @@ help:
 	@echo "  test-coverage  Run tests with coverage report"
 	@echo ""
 	@echo "  ci             Full CI check (typecheck + lint + test-coverage + build)"
+	@echo ""
+	@echo "  docker         Build Docker image ($(IMAGE):$(VERSION))"
+	@echo "  docker-run     Build and run Docker image on port 8080"
+	@echo "  release        Tag and push v$(VERSION) to trigger GitHub Release"
+	@echo ""
 	@echo "  clean          Remove dist and Vite cache"
 
 # ── Dependencies ──────────────────────────────────────────────────────────────
@@ -67,6 +75,24 @@ build:
 # ── CI (mirrors the GitHub Actions check job) ─────────────────────────────────
 
 ci: typecheck lint test-coverage build
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+
+docker:
+	docker build -t $(IMAGE):$(VERSION) -t $(IMAGE):latest .
+
+docker-run: docker
+	docker run --rm -p 8080:80 $(IMAGE):latest
+
+# ── Release ───────────────────────────────────────────────────────────────────
+
+release:
+	@if git rev-parse v$(VERSION) >/dev/null 2>&1; then \
+	  echo "Tag v$(VERSION) already exists"; exit 1; \
+	fi
+	git tag v$(VERSION)
+	git push origin v$(VERSION)
+	@echo "Tagged and pushed v$(VERSION) — GitHub Actions will create the release and Docker image."
 
 # ── Housekeeping ──────────────────────────────────────────────────────────────
 
