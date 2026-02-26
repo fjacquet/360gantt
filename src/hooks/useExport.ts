@@ -15,6 +15,15 @@ function expandForCapture(el: HTMLElement): () => void {
   const prevZoom = (style.zoom as string) ?? ''
   style.zoom = '1'
 
+  // Shrink the outer wrapper to fit content (it normally fills the viewport via
+  // position:absolute + inset:0 + height:100%, which makes scrollHeight = viewport height)
+  const prevHeight = el.style.height
+  const prevPosition = el.style.position
+  const prevInset = el.style.inset
+  el.style.height = 'auto'
+  el.style.position = 'relative'
+  el.style.inset = 'auto'
+
   // Expand SVAR scroll/clip containers: .wx-gantt (rows), .wx-chart (timeline), .wx-bars (bar area)
   type Snapshot = { el: HTMLElement; overflow: string; overflowX: string; overflowY: string; height: string; maxHeight: string }
   const snapshots: Snapshot[] = []
@@ -37,6 +46,9 @@ function expandForCapture(el: HTMLElement): () => void {
 
   return () => {
     style.zoom = prevZoom
+    el.style.height = prevHeight
+    el.style.position = prevPosition
+    el.style.inset = prevInset
     snapshots.forEach(({ el: s, overflow, overflowX, overflowY, height, maxHeight }) => {
       s.style.overflow = overflow
       s.style.overflowX = overflowX

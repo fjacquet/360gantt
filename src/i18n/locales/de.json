@@ -1,0 +1,35 @@
+{
+  "app": {
+    "title": "360gantt",
+    "subtitle": "Asset-Lebenszyklus-Visualisierer"
+  },
+  "header": {
+    "exportPng": "PNG exportieren",
+    "exportPdf": "PDF exportieren",
+    "exportPptx": "PPTX exportieren",
+    "loadSample": "Beispiel laden"
+  },
+  "dropzone": {
+    "title": "Dell-Asset-CSV hier ablegen",
+    "subtitle": "oder klicken zum Durchsuchen — unterstützt EN, FR, IT, DE Exporte",
+    "loading": "Wird analysiert…"
+  },
+  "filter": {
+    "title": "Filter",
+    "search": "Produkte suchen…",
+    "locations": "Standorte",
+    "allLocations": "Alle Standorte",
+    "clear": "Filter zurücksetzen"
+  },
+  "gantt": {
+    "noData": "Laden Sie eine CSV-Datei, um das Gantt-Diagramm anzuzeigen",
+    "assets": "Assets",
+    "locations": "Standorte"
+  },
+  "status": {
+    "ok": "Unter Vertrag (2+ Jahre)",
+    "warning": "Bald erneuern (1–2 Jahre)",
+    "critical": "Dringende Erneuerung (< 1 Jahr)",
+    "expired": "Abgelaufen"
+  }
+}

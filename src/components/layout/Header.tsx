@@ -15,10 +15,10 @@ export function Header({ ganttRef }: HeaderProps) {
   const { exportPng, exportPdf, exportPptx } = useExport(ganttRef)
   const hasData = ganttData.tasks.length > 0
 
-  const toggleLang = () => {
-    const next = i18n.language.startsWith('fr') ? 'en' : 'fr'
-    i18n.changeLanguage(next).catch(console.error)
-  }
+  const LANGS = ['en', 'fr', 'it', 'de'] as const
+  const currentLang = LANGS.find((l) => i18n.language.startsWith(l)) ?? 'en'
+  const nextLang = LANGS[(LANGS.indexOf(currentLang) + 1) % LANGS.length] ?? 'en'
+  const toggleLang = () => i18n.changeLanguage(nextLang).catch(console.error)
 
   const currentZoomLabel = ZOOM_PRESETS[zoomLevel]?.label ?? ''
   const canZoomIn = zoomLevel < ZOOM_PRESETS.length - 1
@@ -105,7 +105,7 @@ export function Header({ ganttRef }: HeaderProps) {
           onClick={toggleLang}
           className="rounded px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
         >
-          {i18n.language.startsWith('fr') ? 'EN' : 'FR'}
+          {nextLang.toUpperCase()}
         </button>
 
         {hasData && (

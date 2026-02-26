@@ -1,0 +1,35 @@
+{
+  "app": {
+    "title": "360gantt",
+    "subtitle": "Visualizzatore del ciclo di vita degli asset"
+  },
+  "header": {
+    "exportPng": "Esporta PNG",
+    "exportPdf": "Esporta PDF",
+    "exportPptx": "Esporta PPTX",
+    "loadSample": "Carica esempio"
+  },
+  "dropzone": {
+    "title": "Trascina qui il tuo CSV Dell",
+    "subtitle": "o clicca per sfogliare — supporta export EN, FR, IT, DE",
+    "loading": "Analisi in corso…"
+  },
+  "filter": {
+    "title": "Filtri",
+    "search": "Cerca prodotti…",
+    "locations": "Sedi",
+    "allLocations": "Tutte le sedi",
+    "clear": "Cancella filtri"
+  },
+  "gantt": {
+    "noData": "Carica un file CSV per visualizzare il diagramma di Gantt",
+    "assets": "asset",
+    "locations": "sedi"
+  },
+  "status": {
+    "ok": "Sotto contratto (2+ anni)",
+    "warning": "Rinnovo imminente (1–2 anni)",
+    "critical": "Rinnovo urgente (< 1 anno)",
+    "expired": "Scaduto"
+  }
+}
