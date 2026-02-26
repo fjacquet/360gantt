@@ -10,8 +10,10 @@ import { toast } from 'sonner'
  */
 function expandForCapture(el: HTMLElement): () => void {
   // Reset CSS zoom on the container itself
-  const prevZoom = (el.style as Record<string, string>)['zoom'] ?? ''
-  ;(el.style as Record<string, string>)['zoom'] = '1'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const style = el.style as any
+  const prevZoom = (style['zoom'] as string) ?? ''
+  style['zoom'] = '1'
 
   // Expand SVAR scroll/clip containers: .wx-gantt (rows), .wx-chart (timeline), .wx-bars (bar area)
   type Snapshot = { el: HTMLElement; overflow: string; overflowX: string; overflowY: string; height: string; maxHeight: string }
@@ -34,7 +36,7 @@ function expandForCapture(el: HTMLElement): () => void {
   })
 
   return () => {
-    ;(el.style as Record<string, string>)['zoom'] = prevZoom
+    style['zoom'] = prevZoom
     snapshots.forEach(({ el: s, overflow, overflowX, overflowY, height, maxHeight }) => {
       s.style.overflow = overflow
       s.style.overflowX = overflowX
