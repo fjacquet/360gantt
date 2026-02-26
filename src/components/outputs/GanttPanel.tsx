@@ -26,14 +26,27 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
   const Theme = dark ? WillowDark : Willow
 
   return (
-    <div ref={ref} className={className} style={{ height: '100%', minHeight: 0, ...style }}>
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        height: '100%',
+        minHeight: 0,
+        // Override SVAR CSS variables for a compact, readable density
+        '--wx-font-size': '12px',
+        '--wx-font-size-sm': '11px',
+        ...style,
+      } as CSSProperties}
+    >
       <Theme>
         <Gantt
           tasks={tasks}
           links={ganttData.links}
           readonly
           scales={scales}
-          columns={[{ id: 'text', header: 'Asset / Product', width: 300 }]}
+          cellWidth={70}
+          cellHeight={28}
+          columns={[{ id: 'text', header: 'Asset / Product', width: 260 }]}
         />
       </Theme>
     </div>
