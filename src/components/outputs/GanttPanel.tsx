@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 import type { CSSProperties } from 'react'
 import { Gantt, Willow, WillowDark } from '@svar-ui/react-gantt'
-import { useAssetStore } from '@store/assetStore'
+import { ZOOM_PRESETS, useAssetStore } from '@store/assetStore'
 import { useDarkMode } from '@hooks/useDarkMode'
 import type { GanttTask } from '@/types/gantt'
 
@@ -14,8 +14,9 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
   { className, style },
   ref,
 ) {
-  const { ganttData, filters } = useAssetStore()
+  const { ganttData, filters, zoomLevel } = useAssetStore()
   const dark = useDarkMode()
+  const scales = ZOOM_PRESETS[zoomLevel]?.scales ?? ZOOM_PRESETS[2]!.scales
 
   const tasks =
     filters.locationIds.length > 0 || filters.search
@@ -31,10 +32,7 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
           tasks={tasks}
           links={ganttData.links}
           readonly
-          scales={[
-            { unit: 'year', step: 1, format: '%Y' },
-            { unit: 'month', step: 3, format: '%M %Y' },
-          ]}
+          scales={scales}
           columns={[{ id: 'text', header: 'Asset / Product', width: 300 }]}
         />
       </Theme>

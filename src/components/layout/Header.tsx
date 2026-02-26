@@ -1,15 +1,17 @@
+import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAssetStore } from '@store/assetStore'
+import { ZOOM_PRESETS, useAssetStore } from '@store/assetStore'
 import { useExport } from '@hooks/useExport'
 import i18n from '@/i18n/config'
 
 interface HeaderProps {
-  ganttRef: React.RefObject<HTMLDivElement | null>
+  ganttRef: RefObject<HTMLDivElement | null>
 }
 
 export function Header({ ganttRef }: HeaderProps) {
   const { t } = useTranslation()
-  const { ganttData, totalAssets, locationGroups, fileName } = useAssetStore()
+  const { ganttData, totalAssets, locationGroups, fileName, zoomLevel, zoomIn, zoomOut } =
+    useAssetStore()
   const { exportPdf, exportPptx } = useExport(ganttRef)
   const hasData = ganttData.tasks.length > 0
 
@@ -17,6 +19,10 @@ export function Header({ ganttRef }: HeaderProps) {
     const next = i18n.language.startsWith('fr') ? 'en' : 'fr'
     i18n.changeLanguage(next).catch(console.error)
   }
+
+  const currentZoomLabel = ZOOM_PRESETS[zoomLevel]?.label ?? ''
+  const canZoomIn = zoomLevel < ZOOM_PRESETS.length - 1
+  const canZoomOut = zoomLevel > 0
 
   return (
     <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-900">
@@ -37,6 +43,33 @@ export function Header({ ganttRef }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Zoom controls */}
+        {hasData && (
+          <div className="flex items-center gap-1 rounded border border-gray-200 bg-gray-50 px-1 dark:border-gray-600 dark:bg-gray-800">
+            <button
+              type="button"
+              onClick={zoomOut}
+              disabled={!canZoomOut}
+              title="Zoom out"
+              className="rounded p-1 text-sm font-bold text-gray-600 hover:bg-gray-200 disabled:opacity-30 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              −
+            </button>
+            <span className="min-w-14 text-center text-xs font-medium text-gray-600 dark:text-gray-300">
+              {currentZoomLabel}
+            </span>
+            <button
+              type="button"
+              onClick={zoomIn}
+              disabled={!canZoomIn}
+              title="Zoom in"
+              className="rounded p-1 text-sm font-bold text-gray-600 hover:bg-gray-200 disabled:opacity-30 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              +
+            </button>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={toggleLang}
