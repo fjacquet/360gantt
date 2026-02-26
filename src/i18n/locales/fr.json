@@ -4,6 +4,7 @@
     "subtitle": "Visualiseur de cycle de vie des actifs"
   },
   "header": {
+    "exportPng": "Exporter PNG",
     "exportPdf": "Exporter PDF",
     "exportPptx": "Exporter PPTX",
     "loadSample": "Charger un exemple"

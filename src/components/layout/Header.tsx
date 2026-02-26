@@ -12,7 +12,7 @@ export function Header({ ganttRef }: HeaderProps) {
   const { t } = useTranslation()
   const { ganttData, totalAssets, locationGroups, fileName, zoomLevel, zoomIn, zoomOut, scaleIdx, scaleUp, scaleDown } =
     useAssetStore()
-  const { exportPdf, exportPptx } = useExport(ganttRef)
+  const { exportPng, exportPdf, exportPptx } = useExport(ganttRef)
   const hasData = ganttData.tasks.length > 0
 
   const toggleLang = () => {
@@ -110,6 +110,13 @@ export function Header({ ganttRef }: HeaderProps) {
 
         {hasData && (
           <>
+            <button
+              type="button"
+              onClick={exportPng}
+              className="rounded bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+            >
+              {t('header.exportPng')}
+            </button>
             <button
               type="button"
               onClick={exportPdf}

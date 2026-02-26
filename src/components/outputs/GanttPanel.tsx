@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { Gantt, Willow, WillowDark } from '@svar-ui/react-gantt'
 import { SCALE_STEPS, ZOOM_PRESETS, useAssetStore } from '@store/assetStore'
 import { useDarkMode } from '@hooks/useDarkMode'
+import { toGanttData } from '@engines/csv/svarAdapter'
 import type { GanttTask } from '@/types/gantt'
 
 interface GanttPanelProps {
@@ -14,15 +15,23 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
   { className, style },
   ref,
 ) {
-  const { ganttData, filters, zoomLevel, scaleIdx } = useAssetStore()
+  const { ganttData, locationGroups, filters, zoomLevel, scaleIdx } = useAssetStore()
   const dark = useDarkMode()
   const scales = ZOOM_PRESETS[zoomLevel]?.scales ?? ZOOM_PRESETS[2]?.scales ?? []
   const cssZoom = SCALE_STEPS[scaleIdx] ?? 1
 
-  const tasks =
-    filters.locationIds.length > 0 || filters.search
-      ? applyFilters(ganttData.tasks, filters.locationIds, filters.search)
-      : ganttData.tasks
+  // Step 1: filter by location using string IDs from locationGroups
+  const visibleGroups =
+    filters.locationIds.length > 0
+      ? locationGroups.filter((g) => filters.locationIds.includes(g.locationId))
+      : locationGroups
+
+  // Step 2: derive base tasks (recompute only when location filter is active)
+  const baseTasks =
+    filters.locationIds.length > 0 ? toGanttData(visibleGroups).tasks : ganttData.tasks
+
+  // Step 3: apply text search on the already-location-filtered flat task list
+  const tasks = filters.search ? applySearchFilter(baseTasks, filters.search) : baseTasks
 
   const Theme = dark ? WillowDark : Willow
 
@@ -56,14 +65,10 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
 })
 
 /**
- * Filter tasks preserving the 3-level hierarchy:
- * keeps location → product summary tasks when any child asset matches the search.
+ * Filter tasks by free-text search, preserving the 3-level hierarchy:
+ * keeps location → product summary tasks when any child asset matches.
  */
-function applyFilters(
-  allTasks: GanttTask[],
-  _locationIds: string[],
-  search: string,
-): GanttTask[] {
+function applySearchFilter(allTasks: GanttTask[], search: string): GanttTask[] {
   if (!search) return allTasks
 
   const searchLower = search.toLowerCase()

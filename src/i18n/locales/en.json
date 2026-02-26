@@ -4,6 +4,7 @@
     "subtitle": "Asset Lifecycle Visualizer"
   },
   "header": {
+    "exportPng": "Export PNG",
     "exportPdf": "Export PDF",
     "exportPptx": "Export PPTX",
     "loadSample": "Load Sample"

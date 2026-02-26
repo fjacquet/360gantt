@@ -187,5 +187,22 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
     }
   }
 
-  return { exportPdf, exportPptx }
+  const exportPng = async () => {
+    const el = ganttRef.current
+    if (!el) return
+    const toastId = toast.loading('Generating PNG…')
+    try {
+      const imgData = await captureElement(el)
+      const a = document.createElement('a')
+      a.href = imgData
+      a.download = '360gantt-export.png'
+      a.click()
+      toast.success('PNG downloaded', { id: toastId })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Export failed'
+      toast.error(msg, { id: toastId })
+    }
+  }
+
+  return { exportPdf, exportPptx, exportPng }
 }
