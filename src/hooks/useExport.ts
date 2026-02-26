@@ -2,76 +2,104 @@ import type { RefObject } from 'react'
 import { toast } from 'sonner'
 
 /**
- * Prepares the Gantt element for full capture:
+ * Prepares the Gantt element for full-height capture:
  * - Resets CSS zoom (html2canvas doesn't handle it reliably)
- * - Expands SVAR's internal scroll containers so all rows/columns are in the DOM
+ * - Releases the outer wrapper from its viewport-filling position
+ * - Expands ALL descendants with overflow clipping so every row is in the DOM
+ * - Dispatches a resize event so SVAR re-renders the newly visible rows
+ * - Does NOT expand horizontal overflow on .wx-chart to avoid empty future-year columns
  *
- * Returns a cleanup function to restore original styles.
+ * Returns a cleanup function that restores every style change.
  */
 function expandForCapture(el: HTMLElement): () => void {
-  // Reset CSS zoom on the container itself — `zoom` is non-standard, not on CSSStyleDeclaration
-  // biome-ignore lint/suspicious/noExplicitAny: zoom is a non-standard CSS property not typed on CSSStyleDeclaration
+  // biome-ignore lint/suspicious/noExplicitAny: zoom is a non-standard CSS property
   const style = el.style as any
   const prevZoom = (style.zoom as string) ?? ''
   style.zoom = '1'
 
-  // Shrink the outer wrapper to fit content (it normally fills the viewport via
-  // position:absolute + inset:0 + height:100%, which makes scrollHeight = viewport height)
-  const prevHeight = el.style.height
-  const prevPosition = el.style.position
-  const prevInset = el.style.inset
+  // Release the wrapper from position:absolute + inset:0 + height:100%
+  // so that scrollHeight reflects content height, not viewport height.
+  const prevElHeight = el.style.height
+  const prevElMinHeight = el.style.minHeight
+  const prevElPosition = el.style.position
+  const prevElInset = el.style.inset
+  const prevElOverflow = el.style.overflow
   el.style.height = 'auto'
+  el.style.minHeight = '0'
   el.style.position = 'relative'
   el.style.inset = 'auto'
+  el.style.overflow = 'visible'
 
-  // Expand SVAR scroll/clip containers: .wx-gantt (rows), .wx-chart (timeline), .wx-bars (bar area)
-  type Snapshot = { el: HTMLElement; overflow: string; overflowX: string; overflowY: string; height: string; maxHeight: string }
-  const snapshots: Snapshot[] = []
+  // Expand every descendant that clips its content.
+  // Skip horizontal overflow on .wx-chart — that container renders the full
+  // time axis including empty future-year columns; keeping it clipped limits
+  // the exported width to what's actually visible.
+  type Snap = {
+    el: HTMLElement
+    overflow: string; overflowX: string; overflowY: string
+    height: string; maxHeight: string; minHeight: string
+  }
+  const snaps: Snap[] = []
 
-  el.querySelectorAll<HTMLElement>('.wx-gantt, .wx-chart, .wx-bars').forEach((s) => {
-    snapshots.push({
+  el.querySelectorAll<HTMLElement>('*').forEach((s) => {
+    const c = getComputedStyle(s)
+    if (c.overflowY === 'visible' && c.overflowX === 'visible') return
+    snaps.push({
       el: s,
       overflow: s.style.overflow,
       overflowX: s.style.overflowX,
       overflowY: s.style.overflowY,
       height: s.style.height,
       maxHeight: s.style.maxHeight,
+      minHeight: s.style.minHeight,
     })
-    s.style.overflow = 'visible'
-    s.style.overflowX = 'visible'
     s.style.overflowY = 'visible'
+    // Keep horizontal clipping on .wx-chart to avoid empty year columns
+    if (!s.classList.contains('wx-chart')) {
+      s.style.overflowX = 'visible'
+    }
     s.style.height = 'auto'
     s.style.maxHeight = 'none'
+    s.style.minHeight = '0'
   })
+
+  // Trigger SVAR to re-render rows that were previously outside the viewport
+  window.dispatchEvent(new Event('resize'))
 
   return () => {
     style.zoom = prevZoom
-    el.style.height = prevHeight
-    el.style.position = prevPosition
-    el.style.inset = prevInset
-    snapshots.forEach(({ el: s, overflow, overflowX, overflowY, height, maxHeight }) => {
+    el.style.height = prevElHeight
+    el.style.minHeight = prevElMinHeight
+    el.style.position = prevElPosition
+    el.style.inset = prevElInset
+    el.style.overflow = prevElOverflow
+    for (const { el: s, overflow, overflowX, overflowY, height, maxHeight, minHeight } of snaps) {
       s.style.overflow = overflow
       s.style.overflowX = overflowX
       s.style.overflowY = overflowY
       s.style.height = height
       s.style.maxHeight = maxHeight
-    })
+      s.style.minHeight = minHeight
+    }
+    window.dispatchEvent(new Event('resize'))
   }
 }
 
 /**
  * Captures a DOM element as a PNG data URL at 2× resolution.
- * Expands all scroll containers first so the full chart is captured.
+ * Uses clientWidth (visible columns only) × scrollHeight (all rows).
  */
 async function captureElement(el: HTMLElement): Promise<string> {
   const { default: html2canvas } = await import('html2canvas')
 
   const restore = expandForCapture(el)
 
-  // Two animation frames: first lets styles apply, second lets SVAR re-render rows
-  await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())))
+  // 150 ms gives SVAR time to respond to the resize event and render new rows
+  await new Promise<void>((r) => setTimeout(r, 150))
 
-  const w = el.scrollWidth
+  // clientWidth: visible columns only (avoids empty future-year columns)
+  // scrollHeight: full content height after overflow expansion
+  const w = el.clientWidth
   const h = el.scrollHeight
 
   let dataUrl: string
@@ -116,19 +144,16 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
       const [{ default: jsPDF }, imgData] = await Promise.all([import('jspdf'), captureElement(el)])
       const img = await loadImage(imgData)
 
-      // Use custom page size so 1 CSS pixel = 1pt (72 dpi).
-      // html2canvas captures at 2× so we halve the pixel count to get logical pt.
-      // This keeps text readable (12px font → 12pt on page) regardless of chart size.
-      const scale = 2 // must match the scale passed to html2canvas
+      // Custom page size: 1 CSS pixel = 1pt (72 dpi).
+      // html2canvas captures at 2× so halve pixel count to get logical pt.
+      const scale = 2
       const pageW = img.naturalWidth / scale   // pt
       const pageH = img.naturalHeight / scale  // pt
 
-      // Split tall charts into portrait-style pages (each page = full width, viewport height slice).
-      // We use the original element's visible height as a natural page break unit.
-      const visibleH = el.offsetHeight // CSS px ≈ pt at 1x
+      // Page break unit: visible height of the element before expansion
+      const visibleH = el.offsetHeight
 
       if (pageH <= visibleH * 1.1) {
-        // Single page — fits within one viewport height (with 10% tolerance)
         const doc = new jsPDF({
           orientation: pageW >= pageH ? 'landscape' : 'portrait',
           unit: 'pt',
@@ -137,9 +162,8 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
         doc.addImage(imgData, 'PNG', 0, 0, pageW, pageH)
         doc.save('360gantt-export.pdf')
       } else {
-        // Multi-page: each page is [pageW × visibleH] pt
         const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: [pageW, visibleH] })
-        const slicePixels = Math.round(visibleH * scale) // image pixels per page
+        const slicePixels = Math.round(visibleH * scale)
         const canvas = document.createElement('canvas')
         canvas.width = img.naturalWidth
 
@@ -153,9 +177,7 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
             ctx.drawImage(img, 0, yPx, img.naturalWidth, hPx, 0, 0, img.naturalWidth, hPx)
             const slice = canvas.toDataURL('image/png')
             if (page > 0) doc.addPage([pageW, visibleH], 'landscape')
-            // Keep aspect of the slice (last page may be shorter)
-            const sliceH = (hPx / scale)
-            doc.addImage(slice, 'PNG', 0, 0, pageW, sliceH)
+            doc.addImage(slice, 'PNG', 0, 0, pageW, hPx / scale)
           }
           yPx += hPx
           page++
@@ -182,7 +204,6 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
       const img = await loadImage(imgData)
 
       const pptx = new PptxGenJS()
-      // Custom slide dimensions matching the captured image (in inches at 96 dpi)
       const scale = 2
       const inchW = img.naturalWidth / scale / 96
       const inchH = img.naturalHeight / scale / 96
