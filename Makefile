@@ -1,4 +1,4 @@
-.PHONY: help install dev build typecheck lint lint-fix format test clean
+.PHONY: help install dev build preview typecheck lint lint-fix format test test-ui test-coverage ci clean
 
 # Default target
 help:
@@ -6,26 +6,37 @@ help:
 	@echo ""
 	@echo "Usage: make [target]"
 	@echo ""
-	@echo "Targets:"
-	@echo "  install    Install dependencies"
-	@echo "  dev        Start development server"
-	@echo "  build      Build for production"
-	@echo "  typecheck  Run TypeScript type checking"
-	@echo "  lint       Run Biome linter"
-	@echo "  lint-fix   Run Biome linter with auto-fix"
-	@echo "  format     Format code with Biome"
-	@echo "  test       Run tests"
-	@echo "  clean      Remove build artifacts"
-	@echo "  all        Run lint, typecheck, and build"
+	@echo "  install        Install dependencies (npm ci)"
+	@echo "  dev            Start development server"
+	@echo "  build          Production build"
+	@echo "  preview        Build then serve locally"
+	@echo ""
+	@echo "  typecheck      TypeScript type check"
+	@echo "  lint           Biome lint"
+	@echo "  lint-fix       Biome lint with auto-fix"
+	@echo "  format         Biome format"
+	@echo ""
+	@echo "  test           Run tests (watch mode)"
+	@echo "  test-ui        Run tests with UI"
+	@echo "  test-coverage  Run tests with coverage report"
+	@echo ""
+	@echo "  ci             Full CI check (typecheck + lint + test-coverage + build)"
+	@echo "  clean          Remove dist and Vite cache"
+
+# ── Dependencies ──────────────────────────────────────────────────────────────
 
 install:
-	npm install
+	npm ci
+
+# ── Development ───────────────────────────────────────────────────────────────
 
 dev:
 	npm run dev
 
-build:
-	npm run build
+preview: build
+	npm run preview
+
+# ── Quality ───────────────────────────────────────────────────────────────────
 
 typecheck:
 	npm run typecheck
@@ -42,8 +53,22 @@ format:
 test:
 	npm test
 
-clean:
-	rm -rf dist
-	rm -rf node_modules/.vite
+test-ui:
+	npm run test:ui
 
-all: lint typecheck build
+test-coverage:
+	npm run test:coverage
+
+# ── Build ─────────────────────────────────────────────────────────────────────
+
+build:
+	npm run build
+
+# ── CI (mirrors the GitHub Actions check job) ─────────────────────────────────
+
+ci: typecheck lint test-coverage build
+
+# ── Housekeeping ──────────────────────────────────────────────────────────────
+
+clean:
+	rm -rf dist node_modules/.vite
