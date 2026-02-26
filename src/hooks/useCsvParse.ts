@@ -1,13 +1,11 @@
 import Papa from 'papaparse'
 import { toast } from 'sonner'
-import { resolveHeaders, toRawAsset } from '@engines/csv/headerResolver'
-import { filterAssets } from '@engines/csv/assetFilter'
+import { resolveHeaders } from '@engines/csv/headerResolver'
+import { filterAssets, toRawAsset } from '@engines/csv/assetFilter'
 import { groupAssets } from '@engines/csv/assetGrouper'
 import { toGanttData } from '@engines/csv/svarAdapter'
 import { useAssetStore } from '@store/assetStore'
 
-// Re-export so components don't need to import from multiple places
-export { resolveHeaders, toRawAsset }
 
 export function useCsvParse() {
   const { setLoading, setError, setData } = useAssetStore()

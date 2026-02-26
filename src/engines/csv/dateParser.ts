@@ -33,7 +33,11 @@ export function parseContractDate(raw: string): Date | null {
   const match = trimmed.match(/^(\w+)\s+(\d{1,2}),\s*(\d{4})$/)
   if (!match) return null
 
-  const [, monthStr, dayStr, yearStr] = match
+  const monthStr = match[1]
+  const dayStr = match[2]
+  const yearStr = match[3]
+  if (!monthStr || !dayStr || !yearStr) return null
+
   const month = MONTH_MAP[monthStr.toLowerCase()]
   if (month === undefined) return null
 

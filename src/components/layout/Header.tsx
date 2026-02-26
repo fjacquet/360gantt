@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAssetStore } from '@store/assetStore'
 import { useExport } from '@hooks/useExport'

@@ -10,7 +10,7 @@ import { contractStatusColor } from '@/utils/colors'
  *     └── ProductGroup (summary, parent=locationTask.id)
  *           └── Asset (task, parent=productTask.id)
  */
-export function toGanttData(locationGroups: LocationGroup[], today = new Date()): GanttData {
+export function toGanttData(locationGroups: LocationGroup[]): GanttData {
   const tasks: GanttTask[] = []
   let idCounter = 1
 
