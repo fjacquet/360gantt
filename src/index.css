@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* SVAR Gantt baseline */
-@import "@svar-ui/react-gantt/dist/gantt.css";
+@import "@svar-ui/react-gantt/style.css";
 
 :root {
   color-scheme: light dark;
