@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 import type { CSSProperties } from 'react'
 import { Gantt, Willow, WillowDark } from '@svar-ui/react-gantt'
-import { ZOOM_PRESETS, useAssetStore } from '@store/assetStore'
+import { SCALE_STEPS, ZOOM_PRESETS, useAssetStore } from '@store/assetStore'
 import { useDarkMode } from '@hooks/useDarkMode'
 import type { GanttTask } from '@/types/gantt'
 
@@ -14,9 +14,10 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
   { className, style },
   ref,
 ) {
-  const { ganttData, filters, zoomLevel } = useAssetStore()
+  const { ganttData, filters, zoomLevel, scaleIdx } = useAssetStore()
   const dark = useDarkMode()
   const scales = ZOOM_PRESETS[zoomLevel]?.scales ?? ZOOM_PRESETS[2]!.scales
+  const cssZoom = SCALE_STEPS[scaleIdx] ?? 1
 
   const tasks =
     filters.locationIds.length > 0 || filters.search
@@ -32,6 +33,7 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
       style={{
         height: '100%',
         minHeight: 0,
+        zoom: cssZoom,
         // Override SVAR CSS variables for a compact, readable density
         '--wx-font-size': '12px',
         '--wx-font-size-sm': '11px',
