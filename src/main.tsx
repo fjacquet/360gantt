@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import '@svar-ui/react-gantt/style.css'
 import './i18n/config'
 import './index.css'
 import App from './App'

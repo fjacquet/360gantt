@@ -12,20 +12,28 @@ export function AppShell() {
   const hasData = ganttData.tasks.length > 0
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-950">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <Header ganttRef={ganttRef} />
 
-      <div className="flex min-h-0 flex-1">
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
         {/* Left sidebar */}
-        <aside className="flex w-64 flex-shrink-0 flex-col gap-4 overflow-y-auto border-r border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
-          <CsvDropzone />
-          <FilterPanel />
+        <aside
+          style={{ width: 260, flexShrink: 0, overflowY: 'auto' }}
+          className="border-r border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+        >
+          <div className="flex flex-col gap-4">
+            <CsvDropzone />
+            <FilterPanel />
+          </div>
         </aside>
 
-        {/* Main content */}
-        <main className="min-w-0 flex-1 overflow-hidden">
+        {/* Main content — must have explicit height for SVAR Gantt */}
+        <main style={{ flex: 1, minWidth: 0, overflow: 'hidden', position: 'relative' }}>
           {hasData ? (
-            <GanttPanel ref={ganttRef} className="h-full w-full" />
+            <GanttPanel
+              ref={ganttRef}
+              style={{ position: 'absolute', inset: 0 }}
+            />
           ) : (
             <EmptyState />
           )}

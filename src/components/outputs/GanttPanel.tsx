@@ -1,65 +1,61 @@
 import { forwardRef } from 'react'
-import { Gantt } from '@svar-ui/react-gantt'
+import type { CSSProperties } from 'react'
+import { Gantt, Willow, WillowDark } from '@svar-ui/react-gantt'
 import { useAssetStore } from '@store/assetStore'
+import { useDarkMode } from '@hooks/useDarkMode'
 import type { GanttTask } from '@/types/gantt'
 
 interface GanttPanelProps {
   className?: string
+  style?: CSSProperties
 }
 
 export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function GanttPanel(
-  { className },
+  { className, style },
   ref,
 ) {
   const { ganttData, filters } = useAssetStore()
+  const dark = useDarkMode()
 
-  // Apply location filter
-  let tasks = ganttData.tasks
-  if (filters.locationIds.length > 0 || filters.search) {
-    tasks = applyFilters(ganttData.tasks, filters.locationIds, filters.search)
-  }
+  const tasks =
+    filters.locationIds.length > 0 || filters.search
+      ? applyFilters(ganttData.tasks, filters.locationIds, filters.search)
+      : ganttData.tasks
+
+  const Theme = dark ? WillowDark : Willow
 
   return (
-    <div ref={ref} className={className} style={{ height: '100%' }}>
-      <Gantt
-        tasks={tasks}
-        links={ganttData.links}
-        scales={[
-          { unit: 'year', step: 1, format: '%Y' },
-          { unit: 'month', step: 3, format: '%M' },
-        ]}
-        columns={[{ id: 'text', header: 'Asset / Product', width: 280, flexgrow: 1 }]}
-      />
+    <div ref={ref} className={className} style={{ height: '100%', minHeight: 0, ...style }}>
+      <Theme>
+        <Gantt
+          tasks={tasks}
+          links={ganttData.links}
+          readonly
+          scales={[
+            { unit: 'year', step: 1, format: '%Y' },
+            { unit: 'month', step: 3, format: '%M %Y' },
+          ]}
+          columns={[{ id: 'text', header: 'Asset / Product', width: 300 }]}
+        />
+      </Theme>
     </div>
   )
 })
 
 /**
- * Filter tasks by location IDs and search text.
- * Summary tasks (locations/products) are kept if any of their children match.
+ * Filter tasks preserving the 3-level hierarchy:
+ * keeps location → product summary tasks when any child asset matches the search.
  */
 function applyFilters(
   allTasks: GanttTask[],
-  locationIds: string[],
+  _locationIds: string[],
   search: string,
 ): GanttTask[] {
-  if (locationIds.length === 0 && !search) return allTasks
+  if (!search) return allTasks
 
   const searchLower = search.toLowerCase()
 
-  // Collect ids of top-level summaries (locations) to keep
-  const topLevelIds = new Set<number | string>()
-
-  // First pass: identify location tasks to keep
-  for (const task of allTasks) {
-    if (task.type === 'summary' && (task.parent === 0 || task.parent === undefined)) {
-      if (locationIds.length === 0 || locationIds.length > 0) {
-        topLevelIds.add(task.id)
-      }
-    }
-  }
-
-  // Build parent→children index
+  // Build parent → children index
   const childrenOf = new Map<number | string, GanttTask[]>()
   for (const task of allTasks) {
     if (task.parent !== undefined && task.parent !== 0) {
@@ -74,31 +70,19 @@ function applyFilters(
   for (const locTask of allTasks.filter(
     (t) => t.type === 'summary' && (t.parent === 0 || t.parent === undefined),
   )) {
-    // Location-level filter: skip if not in selected set
-    if (locationIds.length > 0) {
-      // We use text matching since we don't store locationId on the task
-      // The store's locationGroups array preserves the mapping
-      // For simplicity, keep all if no location filter
-    }
-
     const productTasks = childrenOf.get(locTask.id) ?? []
     const keptProducts: GanttTask[] = []
 
     for (const prodTask of productTasks) {
       const assetTasks = childrenOf.get(prodTask.id) ?? []
-      const matchingAssets = searchLower
-        ? assetTasks.filter((a) => a.text.toLowerCase().includes(searchLower))
-        : assetTasks
-
-      if (matchingAssets.length > 0) {
-        keptProducts.push(prodTask)
-        result.push(prodTask)
-        result.push(...matchingAssets)
+      const matching = assetTasks.filter((a) => a.text.toLowerCase().includes(searchLower))
+      if (matching.length > 0) {
+        keptProducts.push(prodTask, ...matching)
       }
     }
 
     if (keptProducts.length > 0) {
-      result.unshift(locTask)
+      result.push(locTask, ...keptProducts)
     }
   }
 
