@@ -26,10 +26,11 @@ export function FilterPanel() {
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        <label htmlFor="filter-search" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
           {t('filter.search')}
         </label>
         <input
+          id="filter-search"
           type="search"
           value={filters.search}
           onChange={(e) => setFilters({ search: e.target.value })}
@@ -40,9 +41,9 @@ export function FilterPanel() {
 
       <div>
         <div className="mb-1 flex items-center justify-between">
-          <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             {t('filter.locations')}
-          </label>
+          </p>
           {filters.locationIds.length > 0 && (
             <button
               type="button"

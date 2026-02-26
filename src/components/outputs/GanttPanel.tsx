@@ -16,7 +16,7 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
 ) {
   const { ganttData, filters, zoomLevel, scaleIdx } = useAssetStore()
   const dark = useDarkMode()
-  const scales = ZOOM_PRESETS[zoomLevel]?.scales ?? ZOOM_PRESETS[2]!.scales
+  const scales = ZOOM_PRESETS[zoomLevel]?.scales ?? ZOOM_PRESETS[2]?.scales ?? []
   const cssZoom = SCALE_STEPS[scaleIdx] ?? 1
 
   const tasks =

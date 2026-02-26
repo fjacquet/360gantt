@@ -15,14 +15,14 @@ export function CsvDropzone() {
     parseFile(file)
   }
 
-  const onDrop = (e: DragEvent<HTMLDivElement>) => {
+  const onDrop = (e: DragEvent<HTMLButtonElement>) => {
     e.preventDefault()
     setDragOver(false)
     const file = e.dataTransfer.files[0]
     handleFile(file)
   }
 
-  const onDragOver = (e: DragEvent<HTMLDivElement>) => {
+  const onDragOver = (e: DragEvent<HTMLButtonElement>) => {
     e.preventDefault()
     setDragOver(true)
   }
@@ -36,15 +36,13 @@ export function CsvDropzone() {
   }
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       aria-label={t('dropzone.title')}
       onDrop={onDrop}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onClick={() => inputRef.current?.click()}
-      onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
       className={[
         'flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-colors',
         dragOver
@@ -77,6 +75,6 @@ export function CsvDropzone() {
         className="sr-only"
         onChange={onInputChange}
       />
-    </div>
+    </button>
   )
 }

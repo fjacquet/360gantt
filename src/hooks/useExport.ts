@@ -9,11 +9,11 @@ import { toast } from 'sonner'
  * Returns a cleanup function to restore original styles.
  */
 function expandForCapture(el: HTMLElement): () => void {
-  // Reset CSS zoom on the container itself
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // Reset CSS zoom on the container itself — `zoom` is non-standard, not on CSSStyleDeclaration
+  // biome-ignore lint/suspicious/noExplicitAny: zoom is a non-standard CSS property not typed on CSSStyleDeclaration
   const style = el.style as any
-  const prevZoom = (style['zoom'] as string) ?? ''
-  style['zoom'] = '1'
+  const prevZoom = (style.zoom as string) ?? ''
+  style.zoom = '1'
 
   // Expand SVAR scroll/clip containers: .wx-gantt (rows), .wx-chart (timeline), .wx-bars (bar area)
   type Snapshot = { el: HTMLElement; overflow: string; overflowX: string; overflowY: string; height: string; maxHeight: string }
@@ -36,7 +36,7 @@ function expandForCapture(el: HTMLElement): () => void {
   })
 
   return () => {
-    style['zoom'] = prevZoom
+    style.zoom = prevZoom
     snapshots.forEach(({ el: s, overflow, overflowX, overflowY, height, maxHeight }) => {
       s.style.overflow = overflow
       s.style.overflowX = overflowX
