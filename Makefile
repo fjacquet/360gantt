@@ -90,7 +90,7 @@ release:
 	@if git rev-parse v$(VERSION) >/dev/null 2>&1; then \
 	  echo "Tag v$(VERSION) already exists"; exit 1; \
 	fi
-	git tag v$(VERSION)
+	git tag -a v$(VERSION) -m "Release v$(VERSION)"
 	git push origin v$(VERSION)
 	@echo "Tagged and pushed v$(VERSION) — GitHub Actions will create the release and Docker image."
 
