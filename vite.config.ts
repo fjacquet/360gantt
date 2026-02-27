@@ -28,8 +28,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom'],
-          'vendor-svar': ['@svar-ui/react-gantt'],
-          'vendor-pdf': ['jspdf', 'html2canvas'],
+          'vendor-pdf': ['jspdf'],
           'vendor-pptx': ['pptxgenjs'],
           'vendor-state': ['zustand'],
         },

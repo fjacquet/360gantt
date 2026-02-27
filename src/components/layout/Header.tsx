@@ -14,7 +14,7 @@ export function Header({ ganttRef }: HeaderProps) {
   const { t } = useTranslation()
   const { ganttData, totalAssets, locationGroups, zoomLevel, zoomIn, zoomOut, scaleIdx, scaleUp, scaleDown } =
     useAssetStore()
-  const { exportPng, exportPdf, exportPptx } = useExport(ganttRef)
+  const { exportPng, exportPdf, exportPptx, exportMermaid } = useExport(ganttRef)
   const hasData = ganttData.tasks.length > 0
   const [filterOpen, setFilterOpen] = useState(false)
   const filterRef = useRef<HTMLDivElement>(null)
@@ -154,6 +154,13 @@ export function Header({ ganttRef }: HeaderProps) {
               className="rounded bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
             >
               {t('header.exportPdf')}
+            </button>
+            <button
+              type="button"
+              onClick={exportMermaid}
+              className="rounded bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+            >
+              Mermaid
             </button>
             <button
               type="button"

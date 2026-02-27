@@ -1,10 +1,10 @@
 import { forwardRef } from 'react'
 import type { CSSProperties } from 'react'
-import { Gantt, Willow, WillowDark } from '@svar-ui/react-gantt'
 import { SCALE_STEPS, ZOOM_PRESETS, useAssetStore } from '@store/assetStore'
 import { useDarkMode } from '@hooks/useDarkMode'
 import { toGanttData } from '@engines/csv/svarAdapter'
 import type { GanttTask } from '@/types/gantt'
+import { SvgGantt } from './gantt'
 
 interface GanttPanelProps {
   className?: string
@@ -17,7 +17,7 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
 ) {
   const { ganttData, locationGroups, filters, zoomLevel, scaleIdx } = useAssetStore()
   const dark = useDarkMode()
-  const scales = ZOOM_PRESETS[zoomLevel]?.scales ?? ZOOM_PRESETS[2]?.scales ?? []
+  const scales = ZOOM_PRESETS[zoomLevel]?.scales ?? ZOOM_PRESETS[1]?.scales ?? []
   const cssZoom = SCALE_STEPS[scaleIdx] ?? 1
 
   // Step 1: filter by location using string IDs from locationGroups
@@ -33,8 +33,6 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
   // Step 3: apply text search on the already-location-filtered flat task list
   const tasks = filters.search ? applySearchFilter(baseTasks, filters.search) : baseTasks
 
-  const Theme = dark ? WillowDark : Willow
-
   return (
     <div
       ref={ref}
@@ -42,39 +40,26 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
       style={{
         position: 'absolute',
         inset: 0,
-        overflow: 'hidden',
+        overflow: 'auto',
         zoom: cssZoom,
-        // Override SVAR CSS variables for a compact, readable density
-        '--wx-font-size': '12px',
-        '--wx-font-size-sm': '11px',
         ...style,
       } as CSSProperties}
     >
-      <Theme>
-        <Gantt
-          tasks={tasks}
-          links={ganttData.links}
-          readonly
-          scales={scales}
-          cellWidth={70}
-          cellHeight={28}
-          columns={[{ id: 'text', header: 'Asset / Product', width: 260 }]}
-        />
-      </Theme>
+      <SvgGantt tasks={tasks} scales={scales} dark={dark} />
     </div>
   )
 })
 
 /**
  * Filter tasks by free-text search, preserving the 3-level hierarchy:
- * keeps location → product summary tasks when any child asset matches.
+ * keeps location -> product summary tasks when any child asset matches.
  */
 function applySearchFilter(allTasks: GanttTask[], search: string): GanttTask[] {
   if (!search) return allTasks
 
   const searchLower = search.toLowerCase()
 
-  // Build parent → children index
+  // Build parent -> children index
   const childrenOf = new Map<number | string, GanttTask[]>()
   for (const task of allTasks) {
     if (task.parent !== undefined && task.parent !== 0) {

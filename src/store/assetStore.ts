@@ -25,20 +25,12 @@ export const ZOOM_PRESETS: { label: string; scales: ZoomScale[] }[] = [
     label: 'Year',
     scales: [{ unit: 'year', step: 1, format: '%Y' }, { unit: 'month', step: 6, format: '%M' }],
   },
-  {
-    label: 'Quarter',
-    scales: [{ unit: 'year', step: 1, format: '%Y' }, { unit: 'month', step: 3, format: '%M %Y' }],
-  },
-  {
-    label: 'Month',
-    scales: [{ unit: 'month', step: 1, format: '%M %Y' }, { unit: 'day', step: 7, format: '%j' }],
-  },
 ]
 
 /** Visual scale steps: CSS zoom applied to the whole Gantt canvas */
 export const SCALE_STEPS = [0.5, 0.67, 0.75, 0.9, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0]
 const DEFAULT_SCALE_IDX = 4 // 1.0 = 100%
-const DEFAULT_ZOOM_IDX = 2  // Quarter
+const DEFAULT_ZOOM_IDX = 1  // Year
 
 interface AssetState {
   loading: boolean

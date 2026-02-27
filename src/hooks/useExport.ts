@@ -1,138 +1,42 @@
 import type { RefObject } from 'react'
 import { toast } from 'sonner'
+import { useAssetStore } from '@store/assetStore'
 
 /**
- * Prepares the Gantt element for full-height capture:
- * - Resets CSS zoom (html2canvas doesn't handle it reliably)
- * - Releases the outer wrapper from its viewport-filling position
- * - Expands ALL descendants with overflow clipping so every row is in the DOM
- * - Dispatches a resize event so SVAR re-renders the newly visible rows
- * - Does NOT expand horizontal overflow on .wx-chart to avoid empty future-year columns
- *
- * Returns a cleanup function that restores every style change.
- */
-function expandForCapture(el: HTMLElement): () => void {
-  // biome-ignore lint/suspicious/noExplicitAny: zoom is a non-standard CSS property
-  const style = el.style as any
-  const prevZoom = (style.zoom as string) ?? ''
-  style.zoom = '1'
-
-  // Release the wrapper from position:absolute + inset:0 + height:100%
-  // so that scrollHeight reflects content height, not viewport height.
-  // Pin the offsetWidth explicitly: without this, switching from
-  // position:absolute+inset:0 (width from inset) to position:relative
-  // causes the container to lose its width, which collapses SVAR's
-  // internal left-column panel behind the bar chart.
-  const prevElWidth = el.style.width
-  const prevElHeight = el.style.height
-  const prevElMinHeight = el.style.minHeight
-  const prevElPosition = el.style.position
-  const prevElInset = el.style.inset
-  const prevElOverflow = el.style.overflow
-  el.style.width = `${el.offsetWidth}px`
-  el.style.height = 'auto'
-  el.style.minHeight = '0'
-  el.style.position = 'relative'
-  el.style.inset = 'auto'
-  el.style.overflow = 'visible'
-
-  // Expand every descendant that clips its content.
-  // Skip horizontal overflow on .wx-chart — that container renders the full
-  // time axis including empty future-year columns; keeping it clipped limits
-  // the exported width to what's actually visible.
-  type Snap = {
-    el: HTMLElement
-    overflow: string; overflowX: string; overflowY: string
-    height: string; maxHeight: string; minHeight: string
-  }
-  const snaps: Snap[] = []
-
-  el.querySelectorAll<HTMLElement>('*').forEach((s) => {
-    const c = getComputedStyle(s)
-    if (c.overflowY === 'visible' && c.overflowX === 'visible') return
-    snaps.push({
-      el: s,
-      overflow: s.style.overflow,
-      overflowX: s.style.overflowX,
-      overflowY: s.style.overflowY,
-      height: s.style.height,
-      maxHeight: s.style.maxHeight,
-      minHeight: s.style.minHeight,
-    })
-    s.style.overflowY = 'visible'
-    // Keep horizontal clipping on .wx-chart to avoid empty year columns
-    if (!s.classList.contains('wx-chart')) {
-      s.style.overflowX = 'visible'
-    }
-    s.style.height = 'auto'
-    s.style.maxHeight = 'none'
-    s.style.minHeight = '0'
-  })
-
-  // Trigger SVAR to re-render rows that were previously outside the viewport
-  window.dispatchEvent(new Event('resize'))
-
-  return () => {
-    style.zoom = prevZoom
-    el.style.width = prevElWidth
-    el.style.height = prevElHeight
-    el.style.minHeight = prevElMinHeight
-    el.style.position = prevElPosition
-    el.style.inset = prevElInset
-    el.style.overflow = prevElOverflow
-    for (const { el: s, overflow, overflowX, overflowY, height, maxHeight, minHeight } of snaps) {
-      s.style.overflow = overflow
-      s.style.overflowX = overflowX
-      s.style.overflowY = overflowY
-      s.style.height = height
-      s.style.maxHeight = maxHeight
-      s.style.minHeight = minHeight
-    }
-    window.dispatchEvent(new Event('resize'))
-  }
-}
-
-/**
- * Captures a DOM element as a PNG data URL at 2× resolution.
- * Uses clientWidth (visible columns only) × scrollHeight (all rows).
+ * Captures the SVG element inside the ref'd div as a PNG data URL at 2x resolution.
+ * Uses SVG serialization instead of html2canvas.
  */
 async function captureElement(el: HTMLElement): Promise<string> {
-  const { default: html2canvas } = await import('html2canvas')
+  const svg = el.querySelector('svg')
+  if (!svg) throw new Error('No SVG element found')
 
-  const restore = expandForCapture(el)
+  // Clone the SVG and ensure xmlns is set
+  const clone = svg.cloneNode(true) as SVGSVGElement
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 
-  // 150 ms gives SVAR time to respond to the resize event and render new rows
-  await new Promise<void>((r) => setTimeout(r, 150))
+  const serializer = new XMLSerializer()
+  const svgString = serializer.serializeToString(clone)
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
 
-  // clientWidth: visible columns only (avoids empty future-year columns)
-  // scrollHeight: full content height after overflow expansion
-  const w = el.clientWidth
-  const h = el.scrollHeight
+  const svgWidth = svg.width.baseVal.value
+  const svgHeight = svg.height.baseVal.value
+  const scale = 2
 
-  let dataUrl: string
   try {
-    const canvas = await html2canvas(el, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      width: w,
-      height: h,
-      windowWidth: w,
-      windowHeight: h,
-      scrollX: 0,
-      scrollY: 0,
-    })
-    dataUrl = canvas.toDataURL('image/png')
+    const img = await loadImage(url)
+    const canvas = document.createElement('canvas')
+    canvas.width = svgWidth * scale
+    canvas.height = svgHeight * scale
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Cannot get canvas context')
+    ctx.drawImage(img, 0, 0, svgWidth * scale, svgHeight * scale)
+    return canvas.toDataURL('image/png')
   } finally {
-    restore()
+    URL.revokeObjectURL(url)
   }
-
-  return dataUrl
 }
 
-/**
- * Load an Image from a data URL and return it once loaded.
- */
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -142,22 +46,38 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
+/**
+ * Maps a bar color to a Mermaid task status keyword.
+ */
+function colorToMermaidStatus(color: string | undefined): string {
+  if (!color) return ''
+  const c = color.toLowerCase()
+  if (c === '#ef4444') return 'crit, '   // red = critical
+  if (c === '#f59e0b') return 'active, ' // amber = active/warning
+  if (c === '#9ca3af') return 'done, '   // gray = expired/done
+  return ''                               // green or unknown = default
+}
+
+function formatMermaidDate(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
   const exportPdf = async () => {
     const el = ganttRef.current
     if (!el) return
-    const toastId = toast.loading('Generating PDF…')
+    const toastId = toast.loading('Generating PDF\u2026')
     try {
       const [{ default: jsPDF }, imgData] = await Promise.all([import('jspdf'), captureElement(el)])
       const img = await loadImage(imgData)
 
-      // Custom page size: 1 CSS pixel = 1pt (72 dpi).
-      // html2canvas captures at 2× so halve pixel count to get logical pt.
       const scale = 2
-      const pageW = img.naturalWidth / scale   // pt
-      const pageH = img.naturalHeight / scale  // pt
+      const pageW = img.naturalWidth / scale
+      const pageH = img.naturalHeight / scale
 
-      // Page break unit: visible height of the element before expansion
       const visibleH = el.offsetHeight
 
       if (pageH <= visibleH * 1.1) {
@@ -202,7 +122,7 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
   const exportPptx = async () => {
     const el = ganttRef.current
     if (!el) return
-    const toastId = toast.loading('Generating PPTX…')
+    const toastId = toast.loading('Generating PPTX\u2026')
     try {
       const [{ default: PptxGenJS }, imgData] = await Promise.all([
         import('pptxgenjs'),
@@ -230,7 +150,7 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
   const exportPng = async () => {
     const el = ganttRef.current
     if (!el) return
-    const toastId = toast.loading('Generating PNG…')
+    const toastId = toast.loading('Generating PNG\u2026')
     try {
       const imgData = await captureElement(el)
       const a = document.createElement('a')
@@ -244,5 +164,52 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
     }
   }
 
-  return { exportPdf, exportPptx, exportPng }
+  const exportMermaid = () => {
+    const { ganttData } = useAssetStore.getState()
+    const tasks = ganttData.tasks
+    if (tasks.length === 0) return
+
+    const lines: string[] = ['gantt', '  title 360gantt Export', '  dateFormat YYYY-MM-DD']
+
+    // Group by location (top-level summary tasks)
+    for (const task of tasks) {
+      if (task.type === 'summary' && (task.parent === 0 || task.parent === undefined)) {
+        // Location = section
+        lines.push(`  section ${task.text}`)
+
+        // Find product groups under this location
+        const products = tasks.filter((t) => t.parent === task.id && t.type === 'summary')
+        for (const prod of products) {
+          // Find assets under this product
+          const assets = tasks.filter((t) => t.parent === prod.id && t.type === 'task')
+          if (assets.length > 0) {
+            for (const asset of assets) {
+              const status = colorToMermaidStatus(asset.color)
+              lines.push(
+                `    ${asset.text} :${status}${formatMermaidDate(asset.start)}, ${formatMermaidDate(asset.end)}`,
+              )
+            }
+          } else {
+            // No child assets — render the product summary itself
+            const status = colorToMermaidStatus(prod.color)
+            lines.push(
+              `    ${prod.text} :${status}${formatMermaidDate(prod.start)}, ${formatMermaidDate(prod.end)}`,
+            )
+          }
+        }
+      }
+    }
+
+    const content = lines.join('\n')
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = '360gantt-export.mmd'
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Mermaid file downloaded')
+  }
+
+  return { exportPdf, exportPptx, exportPng, exportMermaid }
 }
