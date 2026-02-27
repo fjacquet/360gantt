@@ -7,19 +7,19 @@ describe('contractStatusColor', () => {
     expect(contractStatusColor(-100)).toBe('#9ca3af')
   })
 
-  it('returns red for < 1 year remaining', () => {
-    expect(contractStatusColor(0)).toBe('#ef4444')
-    expect(contractStatusColor(364)).toBe('#ef4444')
+  it('returns Dell dark blue for < 1 year remaining', () => {
+    expect(contractStatusColor(0)).toBe('#003B6F')
+    expect(contractStatusColor(364)).toBe('#003B6F')
   })
 
-  it('returns amber for 1-2 years remaining', () => {
-    expect(contractStatusColor(365)).toBe('#f59e0b')
-    expect(contractStatusColor(729)).toBe('#f59e0b')
+  it('returns Dell blue for 1-2 years remaining', () => {
+    expect(contractStatusColor(365)).toBe('#0076CE')
+    expect(contractStatusColor(729)).toBe('#0076CE')
   })
 
-  it('returns green for > 2 years remaining', () => {
-    expect(contractStatusColor(730)).toBe('#22c55e')
-    expect(contractStatusColor(1000)).toBe('#22c55e')
+  it('returns Dell light blue for > 2 years remaining', () => {
+    expect(contractStatusColor(730)).toBe('#7EC8E3')
+    expect(contractStatusColor(1000)).toBe('#7EC8E3')
   })
 })
 

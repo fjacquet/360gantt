@@ -52,10 +52,10 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 function colorToMermaidStatus(color: string | undefined): string {
   if (!color) return ''
   const c = color.toLowerCase()
-  if (c === '#ef4444') return 'crit, '   // red = critical
-  if (c === '#f59e0b') return 'active, ' // amber = active/warning
+  if (c === '#003b6f') return 'crit, '   // Dell dark blue = critical
+  if (c === '#0076ce') return 'active, ' // Dell blue = warning
   if (c === '#9ca3af') return 'done, '   // gray = expired/done
-  return ''                               // green or unknown = default
+  return ''                               // Dell light blue or unknown = default
 }
 
 function formatMermaidDate(date: Date): string {
