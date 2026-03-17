@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60">
+  <!-- Background -->
+  <rect width="240" height="60" rx="8" fill="#003B6F"/>
+
+  <!-- Mini Gantt bars icon -->
+  <rect x="12" y="14" width="22" height="6" rx="2" fill="#7EC8E3"/>
+  <rect x="12" y="23" width="30" height="6" rx="2" fill="#0076CE"/>
+  <rect x="12" y="32" width="16" height="6" rx="2" fill="#7EC8E3"/>
+  <rect x="12" y="41" width="26" height="6" rx="2" fill="#0076CE"/>
+
+  <!-- "360" text -->
+  <text x="54" y="40" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="700" fill="#7EC8E3">360</text>
+
+  <!-- "gantt" text -->
+  <text x="108" y="40" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="400" fill="#FFFFFF">gantt</text>
+</svg>
