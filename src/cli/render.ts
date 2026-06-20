@@ -5,6 +5,7 @@ import type { ZoomScale } from '@store/assetStore'
 import type { GanttTask } from '@/types/gantt'
 
 export interface RenderOptions {
+  /** Render with the dark palette instead of the default light one. */
   dark?: boolean
 }
 

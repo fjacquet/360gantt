@@ -10,7 +10,9 @@ const tasks: GanttTask[] = [
 
 describe('renderGanttSvg', () => {
   it('returns an SVG string containing the chart and bar colour', () => {
-    const svg = renderGanttSvg(tasks, ZOOM_PRESETS[1]?.scales ?? [])
+    const scales = ZOOM_PRESETS[1]?.scales
+    if (!scales) throw new Error('ZOOM_PRESETS[1] missing — test fixture broken')
+    const svg = renderGanttSvg(tasks, scales)
     expect(svg).toContain('<svg')
     expect(svg).toContain('Asset / Product')
     expect(svg).toContain('#0076ce')
