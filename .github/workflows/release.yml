@@ -4,6 +4,8 @@ on:
     tags: ['v*']
 permissions:
   contents: write
+  id-token: write       # OIDC for build-provenance attestation
+  attestations: write   # write the provenance attestation
   packages: write
 jobs:
   release:
