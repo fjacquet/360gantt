@@ -16,6 +16,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       registerType: 'prompt',
+      // SW registration is wired manually in Task 10 (src/pwa/registerSW.ts), so the plugin must not auto-inject it
       injectRegister: false,
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
