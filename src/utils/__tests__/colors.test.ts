@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { contractStatusColor, contractStatus, STATUS_COLORS } from '../colors'
 
 describe('contractStatusColor', () => {

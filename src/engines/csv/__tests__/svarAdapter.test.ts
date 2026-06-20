@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { toGanttData } from '../svarAdapter'
 import type { LocationGroup } from '@/types/asset'
 

@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { ZOOM_PRESETS } from '@store/assetStore'
 import type { GanttTask } from '@/types/gantt'
 import { renderGanttSvg } from '../render'

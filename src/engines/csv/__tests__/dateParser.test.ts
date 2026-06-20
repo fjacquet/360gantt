@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { parseContractDate, parseInstallBaseAge } from '../dateParser'
 
 describe('parseContractDate', () => {

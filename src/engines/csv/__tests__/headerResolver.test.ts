@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { resolveHeaders, HARDWARE_VALUES, ACTIVE_VALUES } from '../headerResolver'
 
 describe('resolveHeaders', () => {

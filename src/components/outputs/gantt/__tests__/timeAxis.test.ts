@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { computeTimeAxis, dateToX, formatLabel } from '../timeAxis'
 import type { GanttTask } from '@/types/gantt'
 import type { ZoomScale } from '@store/assetStore'

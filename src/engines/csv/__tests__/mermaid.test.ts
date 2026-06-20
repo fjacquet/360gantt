@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import type { GanttTask } from '@/types/gantt'
 import { toMermaid } from '../mermaid'
 

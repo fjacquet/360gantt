@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { NoAssetsError, parseCsvToGantt } from '../pipeline'
 
 const HEADER =

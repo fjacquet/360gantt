@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { svgToPng } from '../rasterize'
 
 const SVG =
