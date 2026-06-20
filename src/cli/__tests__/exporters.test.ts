@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { readFile, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { GanttTask } from '@/types/gantt'
@@ -32,7 +32,8 @@ describe('writeExport', () => {
   const svg = renderGanttSvg(tasks, scales)
 
   it.each(['svg', 'png', 'pdf', 'pptx', 'mmd'] as const)('writes a valid %s file', async (fmt) => {
-    const out = join(tmpdir(), `360gantt-test.${fmt}`)
+    const dir = await mkdtemp(join(tmpdir(), '360gantt-test-'))
+    const out = join(dir, `out.${fmt}`)
     try {
       await writeExport(fmt, { svg, tasks, outPath: out })
       expect(existsSync(out)).toBe(true)
@@ -44,7 +45,7 @@ describe('writeExport', () => {
       if (fmt === 'pdf') expect(buf.subarray(0, 5).toString('latin1')).toBe('%PDF-')
       if (fmt === 'pptx') expect(Array.from(buf.subarray(0, 2))).toEqual([0x50, 0x4b])
     } finally {
-      await rm(out, { force: true })
+      await rm(dir, { recursive: true, force: true })
     }
   }, 30000)
 })
