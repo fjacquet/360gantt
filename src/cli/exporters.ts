@@ -64,7 +64,8 @@ async function writePdf(svg: string, outPath: string): Promise<void> {
   const h = height / 2
   const doc = new jsPDF({ orientation: w >= h ? 'landscape' : 'portrait', unit: 'pt', format: [w, h] })
   doc.addImage(toDataUri(data), 'PNG', 0, 0, w, h)
-  await writeFile(outPath, Buffer.from(doc.output('arraybuffer')))
+  const pdfBytes = doc.output('arraybuffer') as ArrayBuffer
+  await writeFile(outPath, Buffer.from(pdfBytes))
 }
 
 async function writePptx(svg: string, outPath: string): Promise<void> {

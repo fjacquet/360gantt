@@ -16,8 +16,11 @@ const tasks: GanttTask[] = [
 
 describe('formatFromPath', () => {
   it('maps extensions to formats', () => {
+    expect(formatFromPath('a.svg')).toBe('svg')
+    expect(formatFromPath('a.png')).toBe('png')
     expect(formatFromPath('a.pdf')).toBe('pdf')
     expect(formatFromPath('a.PPTX')).toBe('pptx')
+    expect(formatFromPath('a.mmd')).toBe('mmd')
   })
   it('throws on an unsupported extension', () => {
     expect(() => formatFromPath('a.txt')).toThrow(/unsupported/i)
@@ -29,11 +32,20 @@ describe('writeExport', () => {
   if (!scales) throw new Error('ZOOM_PRESETS[1] missing — test fixture broken')
   const svg = renderGanttSvg(tasks, scales)
 
-  it.each(['svg', 'png', 'pdf', 'pptx', 'mmd'] as const)('writes a %s file', async (fmt) => {
+  it.each(['svg', 'png', 'pdf', 'pptx', 'mmd'] as const)('writes a valid %s file', async (fmt) => {
     const out = join(tmpdir(), `360gantt-test.${fmt}`)
-    await writeExport(fmt, { svg, tasks, outPath: out })
-    expect(existsSync(out)).toBe(true)
-    expect((await readFile(out)).byteLength).toBeGreaterThan(100)
-    await rm(out, { force: true })
+    try {
+      await writeExport(fmt, { svg, tasks, outPath: out })
+      expect(existsSync(out)).toBe(true)
+      const buf = await readFile(out)
+      expect(buf.byteLength).toBeGreaterThan(100)
+      if (fmt === 'svg') expect(buf.toString('utf8')).toContain('<svg')
+      if (fmt === 'mmd') expect(buf.toString('utf8')).toContain('gantt')
+      if (fmt === 'png') expect(Array.from(buf.subarray(0, 4))).toEqual([0x89, 0x50, 0x4e, 0x47])
+      if (fmt === 'pdf') expect(buf.subarray(0, 5).toString('latin1')).toBe('%PDF-')
+      if (fmt === 'pptx') expect(Array.from(buf.subarray(0, 2))).toEqual([0x50, 0x4b])
+    } finally {
+      await rm(out, { force: true })
+    }
   }, 30000)
 })
