@@ -1,11 +1,16 @@
 {
-  "name": "360gantt",
+  "name": "@fjacquet/360gantt",
   "version": "1.0.0",
   "description": "Dell asset lifecycle Gantt visualizer — client-side, GitHub Pages ready",
-  "private": true,
+  "private": false,
+  "bin": { "360gantt": "./dist-cli/index.js" },
+  "files": ["dist-cli"],
+  "publishConfig": { "registry": "https://npm.pkg.github.com" },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:cli": "vite build -c vite.cli.config.ts",
+    "prepack": "npm run build:cli",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "lint": "biome lint .",
