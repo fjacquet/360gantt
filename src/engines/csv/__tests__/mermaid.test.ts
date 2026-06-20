@@ -56,4 +56,36 @@ describe('toMermaid', () => {
     ]
     expect(toMermaid(t)).toContain('Server :2024-01-01, 2026-01-01')
   })
+
+  it('sanitizes colons in location labels so they do not collide with the Mermaid label:date separator', () => {
+    const t: GanttTask[] = [
+      {
+        id: 1,
+        text: 'Site A: West',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'summary',
+      },
+      {
+        id: 2,
+        text: 'PowerEdge',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'summary',
+        parent: 1,
+      },
+      {
+        id: 3,
+        text: 'SVC-001',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'task',
+        parent: 2,
+        color: '#0076ce',
+      },
+    ]
+    const out = toMermaid(t)
+    expect(out).toContain('section Site A  West')
+    expect(out).not.toContain('section Site A: West')
+  })
 })

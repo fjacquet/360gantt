@@ -1,5 +1,10 @@
 import type { GanttTask } from '@/types/gantt'
 
+/** Strips characters that would break Mermaid's label:date separator syntax. */
+function sanitizeMermaidLabel(text: string): string {
+  return text.replace(/[:\r\n]+/g, ' ').trim()
+}
+
 /** Maps a bar color to a Mermaid task status keyword. */
 function colorToMermaidStatus(color: string | undefined): string {
   if (!color) return ''
@@ -23,7 +28,7 @@ export function toMermaid(tasks: GanttTask[]): string {
 
   for (const task of tasks) {
     if (task.type === 'summary' && (task.parent === 0 || task.parent === undefined)) {
-      lines.push(`  section ${task.text}`)
+      lines.push(`  section ${sanitizeMermaidLabel(task.text)}`)
       const products = tasks.filter((t) => t.parent === task.id && t.type === 'summary')
       for (const prod of products) {
         const assets = tasks.filter((t) => t.parent === prod.id && t.type === 'task')
@@ -31,13 +36,13 @@ export function toMermaid(tasks: GanttTask[]): string {
           for (const asset of assets) {
             const status = colorToMermaidStatus(asset.color)
             lines.push(
-              `    ${asset.text} :${status}${formatMermaidDate(asset.start)}, ${formatMermaidDate(asset.end)}`,
+              `    ${sanitizeMermaidLabel(asset.text)} :${status}${formatMermaidDate(asset.start)}, ${formatMermaidDate(asset.end)}`,
             )
           }
         } else {
           const status = colorToMermaidStatus(prod.color)
           lines.push(
-            `    ${prod.text} :${status}${formatMermaidDate(prod.start)}, ${formatMermaidDate(prod.end)}`,
+            `    ${sanitizeMermaidLabel(prod.text)} :${status}${formatMermaidDate(prod.start)}, ${formatMermaidDate(prod.end)}`,
           )
         }
       }
