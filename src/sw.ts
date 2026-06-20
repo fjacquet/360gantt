@@ -11,5 +11,6 @@ installFetchGuard()
 
 // Prompt-for-update: registerSW posts SKIP_WAITING when the user clicks Reload.
 self.addEventListener('message', (event) => {
+  if (event.origin && event.origin !== self.location.origin) return
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting()
 })
