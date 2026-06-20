@@ -1,0 +1,5 @@
+ASSET ID,PRODUCT NAME,PRODUCT TYPE,INSTALL BASE AGE,LOCATION ID,LOCATION NAME,SERVICES STATUS,CONTRACT END DATE,END OF STANDARD SUPPORT,CITY,COUNTRY
+A001,PowerEdge R740,HARDWARE,"2yr, 3mo",LOC1,Main DC,Active,"December 31, 2027",,Geneva,Switzerland
+A002,PowerEdge R740,HARDWARE,"1yr",LOC1,Main DC,Active,"June 30, 2028",,Geneva,Switzerland
+A003,Unity XT,HARDWARE,"3yr",LOC2,Backup DC,Active,"March 15, 2026",,Zurich,Switzerland
+A004,vSphere License,SOFTWARE,"1yr",LOC1,Main DC,Active,"January 01, 2030",,Geneva,Switzerland
