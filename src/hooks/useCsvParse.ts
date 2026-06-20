@@ -1,54 +1,29 @@
-import Papa from 'papaparse'
 import { toast } from 'sonner'
-import { resolveHeaders } from '@engines/csv/headerResolver'
-import { filterAssets, toRawAsset } from '@engines/csv/assetFilter'
-import { groupAssets } from '@engines/csv/assetGrouper'
-import { toGanttData } from '@engines/csv/svarAdapter'
+import { NoAssetsError, parseCsvToGantt } from '@engines/csv/pipeline'
 import { useAssetStore } from '@store/assetStore'
-
 
 export function useCsvParse() {
   const { setLoading, setError, setData } = useAssetStore()
 
-  const parseFile = (file: File) => {
+  const parseFile = async (file: File) => {
     setLoading(true)
-
-    Papa.parse<Record<string, string>>(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete(results) {
-        try {
-          const rawHeaders = results.meta.fields ?? []
-          const fieldMap = resolveHeaders(rawHeaders)
-
-          const rawAssets = results.data.map((row) => toRawAsset(row, fieldMap))
-          const parsed = filterAssets(rawAssets)
-
-          if (parsed.length === 0) {
-            toast.warning('No hardware assets with active contracts found in this file.')
-            setError('No matching assets found.')
-            return
-          }
-
-          const locationGroups = groupAssets(parsed)
-          const ganttData = toGanttData(locationGroups)
-
-          setData(locationGroups, ganttData, parsed.length, file.name)
-
-          toast.success(
-            `Loaded ${parsed.length} assets across ${locationGroups.length} locations`,
-          )
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Unknown parse error'
-          setError(msg)
-          toast.error(`Parse error: ${msg}`)
-        }
-      },
-      error(err) {
-        setError(err.message)
-        toast.error(`File error: ${err.message}`)
-      },
-    })
+    try {
+      const text = await file.text()
+      const { ganttData, locationGroups, totalAssets, parseErrors } = parseCsvToGantt(text)
+      setData(locationGroups, ganttData, totalAssets, file.name)
+      toast.success(`Loaded ${totalAssets} assets across ${locationGroups.length} locations`)
+      if (parseErrors.length > 0)
+        toast.warning(`${parseErrors.length} row(s) had CSV formatting issues`)
+    } catch (err) {
+      if (err instanceof NoAssetsError) {
+        toast.warning(err.message)
+        setError('No matching assets found.')
+        return
+      }
+      const msg = err instanceof Error ? err.message : 'Unknown parse error'
+      setError(msg)
+      toast.error(`Parse error: ${msg}`)
+    }
   }
 
   return { parseFile }

@@ -1,0 +1,31 @@
+import { existsSync } from 'node:fs'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import process from 'node:process'
+import { parseCsvToGantt } from '@engines/csv/pipeline'
+import { ZOOM_PRESETS } from '@store/assetStore'
+import { writeExport } from '../exporters'
+import { renderGanttSvg } from '../render'
+
+const FIXTURE = join(process.cwd(), 'tests', 'fixtures', 'sample-assets.csv')
+
+describe('cli export pipeline (fixture → every format)', () => {
+  it('parses the fixture and renders all formats', async () => {
+    const csv = await readFile(FIXTURE, 'utf8')
+    const { ganttData, totalAssets } = parseCsvToGantt(csv)
+    expect(totalAssets).toBe(3) // three hardware/active rows; the software row is filtered
+
+    const svg = renderGanttSvg(ganttData.tasks, ZOOM_PRESETS[1]?.scales ?? [])
+    const dir = await mkdtemp(join(tmpdir(), '360gantt-e2e-'))
+    try {
+      for (const fmt of ['svg', 'png', 'pdf', 'pptx', 'mmd'] as const) {
+        const out = join(dir, `out.${fmt}`)
+        await writeExport(fmt, { svg, tasks: ganttData.tasks, outPath: out })
+        expect(existsSync(out)).toBe(true)
+      }
+    } finally {
+      await rm(dir, { recursive: true, force: true })
+    }
+  }, 30000)
+})

@@ -12,6 +12,6 @@ jobs:
     uses: fjacquet/ci/.github/workflows/web-release.yml@v1
     with:
       node-version: "24"
-      publish-npm: false
+      publish-npm: true
       publish-docker: true
       build-dir: "dist"

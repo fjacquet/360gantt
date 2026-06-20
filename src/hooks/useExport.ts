@@ -1,5 +1,6 @@
 import type { RefObject } from 'react'
 import { toast } from 'sonner'
+import { toMermaid } from '@engines/csv/mermaid'
 import { useAssetStore } from '@store/assetStore'
 
 /**
@@ -46,24 +47,6 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
-/**
- * Maps a bar color to a Mermaid task status keyword.
- */
-function colorToMermaidStatus(color: string | undefined): string {
-  if (!color) return ''
-  const c = color.toLowerCase()
-  if (c === '#003b6f') return 'crit, '   // Dell dark blue = critical
-  if (c === '#0076ce') return 'active, ' // Dell blue = warning
-  if (c === '#9ca3af') return 'done, '   // gray = expired/done
-  return ''                               // Dell light blue or unknown = default
-}
-
-function formatMermaidDate(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
 
 export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
   const exportPdf = async () => {
@@ -169,38 +152,7 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
     const tasks = ganttData.tasks
     if (tasks.length === 0) return
 
-    const lines: string[] = ['gantt', '  title 360gantt Export', '  dateFormat YYYY-MM-DD']
-
-    // Group by location (top-level summary tasks)
-    for (const task of tasks) {
-      if (task.type === 'summary' && (task.parent === 0 || task.parent === undefined)) {
-        // Location = section
-        lines.push(`  section ${task.text}`)
-
-        // Find product groups under this location
-        const products = tasks.filter((t) => t.parent === task.id && t.type === 'summary')
-        for (const prod of products) {
-          // Find assets under this product
-          const assets = tasks.filter((t) => t.parent === prod.id && t.type === 'task')
-          if (assets.length > 0) {
-            for (const asset of assets) {
-              const status = colorToMermaidStatus(asset.color)
-              lines.push(
-                `    ${asset.text} :${status}${formatMermaidDate(asset.start)}, ${formatMermaidDate(asset.end)}`,
-              )
-            }
-          } else {
-            // No child assets — render the product summary itself
-            const status = colorToMermaidStatus(prod.color)
-            lines.push(
-              `    ${prod.text} :${status}${formatMermaidDate(prod.start)}, ${formatMermaidDate(prod.end)}`,
-            )
-          }
-        }
-      }
-    }
-
-    const content = lines.join('\n')
+    const content = toMermaid(tasks)
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
