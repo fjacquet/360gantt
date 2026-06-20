@@ -9,7 +9,7 @@ let wasmReady: Promise<void> | null = null
 function ensureWasm(): Promise<void> {
   if (!wasmReady) {
     const wasmPath = require.resolve('@resvg/resvg-wasm/index_bg.wasm')
-    wasmReady = readFile(wasmPath).then((buf) => initWasm(buf))
+    wasmReady = readFile(wasmPath).then((buf) => initWasm(new Uint8Array(buf)))
   }
   return wasmReady
 }
