@@ -12,6 +12,7 @@ describe('parseCsvToGantt', () => {
     expect(result.totalAssets).toBe(1)
     expect(result.locationGroups).toHaveLength(1)
     expect(result.ganttData.tasks.length).toBeGreaterThan(0)
+    expect(result.parseErrors).toEqual([])
   })
 
   it('throws when no headers are recognised', () => {

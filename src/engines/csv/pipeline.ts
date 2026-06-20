@@ -10,6 +10,7 @@ export interface ParseResult {
   ganttData: GanttData
   locationGroups: LocationGroup[]
   totalAssets: number
+  parseErrors: string[]
 }
 
 /** Thrown when the CSV parses but contains no hardware/active assets. */
@@ -30,6 +31,7 @@ export function parseCsvToGantt(csvText: string): ParseResult {
     header: true,
     skipEmptyLines: true,
   })
+  const parseErrors = results.errors.map((e) => e.message)
   const rawHeaders = results.meta.fields ?? []
   const fieldMap = resolveHeaders(rawHeaders)
   const rawAssets = results.data.map((row) => toRawAsset(row, fieldMap))
@@ -39,5 +41,5 @@ export function parseCsvToGantt(csvText: string): ParseResult {
   }
   const locationGroups = groupAssets(parsed)
   const ganttData = toGanttData(locationGroups)
-  return { ganttData, locationGroups, totalAssets: parsed.length }
+  return { ganttData, locationGroups, totalAssets: parsed.length, parseErrors }
 }

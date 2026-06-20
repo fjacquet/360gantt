@@ -9,9 +9,11 @@ export function useCsvParse() {
     setLoading(true)
     try {
       const text = await file.text()
-      const { ganttData, locationGroups, totalAssets } = parseCsvToGantt(text)
+      const { ganttData, locationGroups, totalAssets, parseErrors } = parseCsvToGantt(text)
       setData(locationGroups, ganttData, totalAssets, file.name)
       toast.success(`Loaded ${totalAssets} assets across ${locationGroups.length} locations`)
+      if (parseErrors.length > 0)
+        toast.warning(`${parseErrors.length} row(s) had CSV formatting issues`)
     } catch (err) {
       if (err instanceof NoAssetsError) {
         toast.warning(err.message)

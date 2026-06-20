@@ -31,10 +31,12 @@ export function buildProgram(): Command {
       const preset = ZOOM_PRESETS[zoomIdx]
       if (!preset) throw new Error('Invalid zoom preset.')
       const csv = await readFile(input, 'utf8')
-      const { ganttData } = parseCsvToGantt(csv)
+      const { ganttData, parseErrors } = parseCsvToGantt(csv)
       const svg = renderGanttSvg(ganttData.tasks, preset.scales, { dark: opts.dark })
       await writeExport(format, { svg, tasks: ganttData.tasks, outPath: opts.output })
       process.stdout.write(`Wrote ${opts.output}\n`)
+      if (parseErrors.length > 0)
+        process.stderr.write(`Warning: ${parseErrors.length} CSV parse issue(s)\n`)
     })
   return program
 }
