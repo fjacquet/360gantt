@@ -72,4 +72,37 @@ describe('groupAssets', () => {
     expect(loc?.locationStart.getFullYear()).toBe(2019)
     expect(loc?.locationEnd.getFullYear()).toBe(2030)
   })
+
+  it('extends group/location span to barEnd', () => {
+    const assets: ParsedAsset[] = [
+      makeAsset({
+        assetId: 'EXP',
+        contractEnd: new Date(2024, 0, 1),
+        barEnd: new Date(2030, 0, 1),
+        daysRemaining: -100,
+      }),
+    ]
+    const groups = groupAssets(assets)
+    expect(groups[0]?.productGroups[0]?.groupEnd.getFullYear()).toBe(2030)
+    expect(groups[0]?.locationEnd.getFullYear()).toBe(2030)
+  })
+
+  it('sorts overdue (expired) locations ahead of active ones despite a later barEnd', () => {
+    const assets: ParsedAsset[] = [
+      makeAsset({
+        locationId: 'L_ACTIVE',
+        contractEnd: new Date(2028, 0, 1),
+        barEnd: new Date(2028, 0, 1),
+        daysRemaining: 700,
+      }),
+      makeAsset({
+        locationId: 'L_EXPIRED',
+        contractEnd: new Date(2024, 0, 1),
+        barEnd: new Date(2030, 0, 1),
+        daysRemaining: -100,
+      }),
+    ]
+    const groups = groupAssets(assets)
+    expect(groups[0]?.locationId).toBe('L_EXPIRED')
+  })
 })
