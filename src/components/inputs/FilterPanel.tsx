@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useAssetStore } from '@store/assetStore'
-import { STATUS_COLORS } from '@utils/colors'
+import { STATUS_COLORS, STATUS_ORDER } from '@utils/colors'
 import type { ContractStatus } from '@/types/asset'
 
 export function FilterPanel() {
@@ -16,12 +16,12 @@ export function FilterPanel() {
     setFilters({ locationIds: next })
   }
 
-  const statuses: { status: ContractStatus; label: string }[] = [
-    { status: 'ok', label: t('status.ok') },
-    { status: 'warning', label: t('status.warning') },
-    { status: 'critical', label: t('status.critical') },
-    { status: 'expired', label: t('status.expired') },
-  ]
+  const statusItems = STATUS_ORDER.map((status) => ({ status, label: t(`status.${status}`) }))
+
+  const toggleStatus = (s: ContractStatus) => {
+    const cur = filters.statuses
+    setFilters({ statuses: cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s] })
+  }
 
   return (
     <div className="space-y-4">
@@ -76,21 +76,45 @@ export function FilterPanel() {
         </div>
       </div>
 
-      {/* Legend */}
+      {/* Legend — click a row to show/hide that status bucket */}
       <div>
-        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Legend
-        </p>
+        <div className="mb-1 flex items-center justify-between">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            {t('filter.legend')}
+          </p>
+          {filters.statuses.length < STATUS_ORDER.length && (
+            <button
+              type="button"
+              onClick={() => setFilters({ statuses: [...STATUS_ORDER] })}
+              className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+            >
+              {t('filter.showAll')}
+            </button>
+          )}
+        </div>
         <div className="space-y-1">
-          {statuses.map(({ status, label }) => (
-            <div key={status} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-              <span
-                className="inline-block h-3 w-3 flex-shrink-0 rounded-sm"
-                style={{ backgroundColor: STATUS_COLORS[status] }}
-              />
-              {label}
-            </div>
-          ))}
+          {statusItems.map(({ status, label }) => {
+            const visible = filters.statuses.includes(status)
+            return (
+              <button
+                key={status}
+                type="button"
+                aria-pressed={visible}
+                onClick={() => toggleStatus(status)}
+                className={`flex w-full items-center gap-2 text-xs ${
+                  visible
+                    ? 'text-gray-600 dark:text-gray-300'
+                    : 'text-gray-400 line-through opacity-50 dark:text-gray-500'
+                }`}
+              >
+                <span
+                  className="inline-block h-3 w-3 flex-shrink-0 rounded-sm"
+                  style={{ backgroundColor: STATUS_COLORS[status] }}
+                />
+                {label}
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>
