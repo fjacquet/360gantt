@@ -1,13 +1,21 @@
 import type { LocationGroup, ParsedAsset, ProductGroup } from '@/types/asset'
 
-/** Latest of a list of dates (defaults to now for an empty list). */
+/** Latest of a non-empty list of dates. Throws if the list is empty. */
 function latest(dates: Date[]): Date {
-  return dates.reduce((max, d) => (d > max ? d : max), dates[0] ?? new Date())
+  const first = dates[0]
+  if (first === undefined) throw new Error('latest(): empty date list')
+  let max = first
+  for (const d of dates) if (d > max) max = d
+  return max
 }
 
-/** Earliest of a list of dates (defaults to now for an empty list). */
+/** Earliest of a non-empty list of dates. Throws if the list is empty. */
 function earliest(dates: Date[]): Date {
-  return dates.reduce((min, d) => (d < min ? d : min), dates[0] ?? new Date())
+  const first = dates[0]
+  if (first === undefined) throw new Error('earliest(): empty date list')
+  let min = first
+  for (const d of dates) if (d < min) min = d
+  return min
 }
 
 /**

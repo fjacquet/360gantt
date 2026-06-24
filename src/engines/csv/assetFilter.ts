@@ -45,9 +45,10 @@ export function isIncluded(raw: RawAsset): boolean {
  * Assumes isIncluded() has already returned true.
  */
 export function toParsedAsset(raw: RawAsset, today = new Date()): ParsedAsset {
+  const endOfSupport = parseContractDate(raw.endOfStandardSupport)
   const contractEnd =
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by isIncluded()
-    parseContractDate(raw.contractEndDate) ?? parseContractDate(raw.endOfStandardSupport)!
+    parseContractDate(raw.contractEndDate) ?? endOfSupport!
 
   const installDate = parseInstallBaseAge(raw.installBaseAge, today) ?? contractEnd
 
@@ -55,7 +56,6 @@ export function toParsedAsset(raw: RawAsset, today = new Date()): ParsedAsset {
     (contractEnd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
   )
 
-  const endOfSupport = parseContractDate(raw.endOfStandardSupport)
   const barEnd = daysRemaining < 0 ? (endOfSupport ?? contractEnd) : contractEnd
 
   return {

@@ -178,4 +178,18 @@ describe('barEnd / endOfSupport', () => {
     expect(parsed.endOfSupport).toBeNull()
     expect(parsed.barEnd.getTime()).toBe(parsed.contractEnd.getTime())
   })
+
+  it('treats an ended-status asset with a future contract date as live (barEnd = contractEnd)', () => {
+    const parsed = toParsedAsset(
+      {
+        ...baseAsset,
+        servicesStatus: 'Ended',
+        contractEndDate: 'December 31, 2027',
+        endOfStandardSupport: 'June 30, 2030',
+      },
+      today,
+    )
+    expect(parsed.daysRemaining).toBeGreaterThan(0)
+    expect(parsed.barEnd.getTime()).toBe(parsed.contractEnd.getTime())
+  })
 })
