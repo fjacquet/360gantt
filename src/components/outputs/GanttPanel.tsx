@@ -3,6 +3,8 @@ import type { CSSProperties } from 'react'
 import { SCALE_STEPS, ZOOM_PRESETS, useAssetStore } from '@store/assetStore'
 import { useDarkMode } from '@hooks/useDarkMode'
 import { toGanttData } from '@engines/csv/svarAdapter'
+import { filterGroupsByStatus } from '@engines/csv/statusFilter'
+import { STATUS_ORDER } from '@utils/colors'
 import type { GanttTask } from '@/types/gantt'
 import { SvgGantt } from './gantt'
 
@@ -21,16 +23,24 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
   const cssZoom = SCALE_STEPS[scaleIdx] ?? 1
 
   // Step 1: filter by location using string IDs from locationGroups
-  const visibleGroups =
+  const locationFiltered =
     filters.locationIds.length > 0
       ? locationGroups.filter((g) => filters.locationIds.includes(g.locationId))
       : locationGroups
 
-  // Step 2: derive base tasks (recompute only when location filter is active)
-  const baseTasks =
-    filters.locationIds.length > 0 ? toGanttData(visibleGroups).tasks : ganttData.tasks
+  // Step 2: filter by contract status (no-op when all buckets are visible)
+  const statusActive = filters.statuses.length < STATUS_ORDER.length
+  const statusFiltered = statusActive
+    ? filterGroupsByStatus(locationFiltered, filters.statuses)
+    : locationFiltered
 
-  // Step 3: apply text search on the already-location-filtered flat task list
+  // Step 3: derive base tasks (recompute only when a location or status filter is active)
+  const baseTasks =
+    filters.locationIds.length > 0 || statusActive
+      ? toGanttData(statusFiltered).tasks
+      : ganttData.tasks
+
+  // Step 4: apply text search on the already-location-filtered flat task list
   const tasks = filters.search ? applySearchFilter(baseTasks, filters.search) : baseTasks
 
   return (

@@ -1,12 +1,15 @@
 import { create } from 'zustand'
 import type { GanttData } from '@/types/gantt'
-import type { LocationGroup } from '@/types/asset'
+import type { ContractStatus, LocationGroup } from '@/types/asset'
+import { STATUS_ORDER } from '@/utils/colors'
 
 export interface Filters {
   /** Location IDs to show; empty = show all */
   locationIds: string[]
   /** Free text search on product name */
   search: string
+  /** Contract-status buckets currently visible. Defaults to all of STATUS_ORDER. */
+  statuses: ContractStatus[]
 }
 
 /** Time-axis zoom presets (widest → finest) */
@@ -62,7 +65,7 @@ const initialState = {
   error: null,
   locationGroups: [],
   ganttData: { tasks: [], links: [] },
-  filters: { locationIds: [], search: '' },
+  filters: { locationIds: [], search: '', statuses: [...STATUS_ORDER] },
   totalAssets: 0,
   fileName: null,
   zoomLevel: DEFAULT_ZOOM_IDX,
