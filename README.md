@@ -47,7 +47,7 @@ Required columns (any supported language):
 | Location ID | `LOCATION ID` | `ID D'EMPLACEMENT` |
 | Location Name | `LOCATION NAME` | `NOM DE L'EMPLACEMENT` |
 
-Only rows where `PRODUCT TYPE = HARDWARE` and `SERVICES STATUS = Active` with a valid contract end date are shown.
+Rows where `PRODUCT TYPE = HARDWARE` with a parseable contract end date are shown, **regardless of `SERVICES STATUS`** — assets whose contracts have lapsed appear too (rendered gray, with the bar extended to the end of standard support).
 
 ---
 
@@ -105,7 +105,7 @@ src/
 ├── engines/csv/          # Pure CSV pipeline (fully unit-tested)
 │   ├── headerResolver    # EN/FR/IT/DE column alias normalisation
 │   ├── dateParser        # "July 23, 2026" and "4yr, 3mo, 1d" → Date
-│   ├── assetFilter       # HARDWARE + Active + has contract date
+│   ├── assetFilter       # HARDWARE + parseable date (any contract status)
 │   ├── assetGrouper      # Group by location → product, sort by expiry
 │   └── svarAdapter       # Domain model → SVAR Gantt task array
 ├── components/

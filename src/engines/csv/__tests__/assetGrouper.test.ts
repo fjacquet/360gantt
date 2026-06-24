@@ -2,6 +2,7 @@ import { groupAssets } from '../assetGrouper'
 import type { ParsedAsset } from '@/types/asset'
 
 function makeAsset(overrides: Partial<ParsedAsset> = {}): ParsedAsset {
+  const contractEnd = overrides.contractEnd ?? new Date(2027, 0, 1)
   return {
     assetId: 'A1',
     productName: 'PowerEdge R740',
@@ -10,9 +11,11 @@ function makeAsset(overrides: Partial<ParsedAsset> = {}): ParsedAsset {
     city: 'Geneva',
     country: 'Switzerland',
     installDate: new Date(2022, 0, 1),
-    contractEnd: new Date(2027, 0, 1),
     daysRemaining: 730,
+    endOfSupport: null,
     ...overrides,
+    contractEnd,
+    barEnd: overrides.barEnd ?? contractEnd,
   }
 }
 
@@ -68,5 +71,71 @@ describe('groupAssets', () => {
     const loc = groups[0]
     expect(loc?.locationStart.getFullYear()).toBe(2019)
     expect(loc?.locationEnd.getFullYear()).toBe(2030)
+  })
+
+  it('extends group/location span to barEnd', () => {
+    const assets: ParsedAsset[] = [
+      makeAsset({
+        assetId: 'EXP',
+        contractEnd: new Date(2024, 0, 1),
+        barEnd: new Date(2030, 0, 1),
+        daysRemaining: -100,
+      }),
+    ]
+    const groups = groupAssets(assets)
+    expect(groups[0]?.productGroups[0]?.groupEnd.getFullYear()).toBe(2030)
+    expect(groups[0]?.locationEnd.getFullYear()).toBe(2030)
+  })
+
+  it('sorts overdue (expired) locations ahead of active ones despite a later barEnd', () => {
+    const assets: ParsedAsset[] = [
+      makeAsset({
+        locationId: 'L_ACTIVE',
+        contractEnd: new Date(2028, 0, 1),
+        barEnd: new Date(2028, 0, 1),
+        daysRemaining: 700,
+      }),
+      makeAsset({
+        locationId: 'L_EXPIRED',
+        contractEnd: new Date(2024, 0, 1),
+        barEnd: new Date(2030, 0, 1),
+        daysRemaining: -100,
+      }),
+    ]
+    const groups = groupAssets(assets)
+    expect(groups[0]?.locationId).toBe('L_EXPIRED')
+  })
+
+  it('surfaces a mixed location with overdue work above a fully-live location', () => {
+    const assets: ParsedAsset[] = [
+      // Mixed group (same location + product): an overdue asset (2023, bar extends to
+      // 2030) plus a far-future live sibling (2029).
+      makeAsset({
+        assetId: 'EXP',
+        locationId: 'L_MIX',
+        contractEnd: new Date(2023, 0, 1),
+        barEnd: new Date(2030, 0, 1),
+        daysRemaining: -800,
+      }),
+      makeAsset({
+        assetId: 'FUTURE',
+        locationId: 'L_MIX',
+        contractEnd: new Date(2029, 0, 1),
+        barEnd: new Date(2029, 0, 1),
+        daysRemaining: 1500,
+      }),
+      // A fully-live location whose contract ends 2026.
+      makeAsset({
+        locationId: 'L_LIVE',
+        contractEnd: new Date(2026, 0, 1),
+        barEnd: new Date(2026, 0, 1),
+        daysRemaining: 365,
+      }),
+    ]
+    const groups = groupAssets(assets)
+    // L_MIX's urgency is its SOONEST contract end (2023, overdue), so it sorts above
+    // L_LIVE (2026) despite also holding a 2029 contract. If ordering keyed on the
+    // latest contract end (2029) — or on barEnd (2030) — L_MIX would sort BELOW L_LIVE.
+    expect(groups.map((g) => g.locationId)).toEqual(['L_MIX', 'L_LIVE'])
   })
 })

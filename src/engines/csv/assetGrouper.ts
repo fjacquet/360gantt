@@ -1,12 +1,30 @@
 import type { LocationGroup, ParsedAsset, ProductGroup } from '@/types/asset'
 
+/** Latest of a non-empty list of dates. Throws if the list is empty. */
+function latest(dates: Date[]): Date {
+  const first = dates[0]
+  if (first === undefined) throw new Error('latest(): empty date list')
+  let max = first
+  for (const d of dates) if (d > max) max = d
+  return max
+}
+
+/** Earliest of a non-empty list of dates. Throws if the list is empty. */
+function earliest(dates: Date[]): Date {
+  const first = dates[0]
+  if (first === undefined) throw new Error('earliest(): empty date list')
+  let min = first
+  for (const d of dates) if (d < min) min = d
+  return min
+}
+
 /**
  * Groups parsed assets by locationId → productName.
- * Locations and product groups are sorted by their end date (soonest first)
- * so the most urgent items appear at the top.
+ * Summary spans (groupEnd / locationEnd) extend to the latest child barEnd,
+ * but ordering stays driven by contract end (soonest first) so the most
+ * urgent items — including overdue/expired contracts — appear at the top.
  */
 export function groupAssets(assets: ParsedAsset[]): LocationGroup[] {
-  // Accumulate into a map: locationId → productName → assets[]
   const locationMap = new Map<string, Map<string, ParsedAsset[]>>()
 
   for (const asset of assets) {
@@ -29,30 +47,24 @@ export function groupAssets(assets: ParsedAsset[]): LocationGroup[] {
       // Sort assets within a product group by contract end (soonest first)
       productAssets.sort((a, b) => a.contractEnd.getTime() - b.contractEnd.getTime())
 
-      const groupStart = productAssets.reduce(
-        (min, a) => (a.installDate < min ? a.installDate : min),
-        productAssets[0]?.installDate ?? new Date(),
-      )
-      const groupEnd = productAssets.reduce(
-        (max, a) => (a.contractEnd > max ? a.contractEnd : max),
-        productAssets[0]?.contractEnd ?? new Date(),
-      )
+      const groupStart = earliest(productAssets.map((a) => a.installDate))
+      // Span extends to the latest bar end (end-of-support for expired assets)
+      const groupEnd = latest(productAssets.map((a) => a.barEnd))
 
       productGroups.push({ productName, assets: productAssets, groupStart, groupEnd })
     }
 
-    // Sort product groups by their end date
-    productGroups.sort((a, b) => a.groupEnd.getTime() - b.groupEnd.getTime())
+    // Order product groups by urgency: soonest (earliest) contract end first, so a
+    // group with any overdue asset surfaces even if it also holds far-future ones.
+    productGroups.sort(
+      (a, b) =>
+        earliest(a.assets.map((x) => x.contractEnd)).getTime() -
+        earliest(b.assets.map((x) => x.contractEnd)).getTime(),
+    )
 
     const representative = assets.find((a) => a.locationId === locationId)
-    const locationStart = productGroups.reduce(
-      (min, g) => (g.groupStart < min ? g.groupStart : min),
-      productGroups[0]?.groupStart ?? new Date(),
-    )
-    const locationEnd = productGroups.reduce(
-      (max, g) => (g.groupEnd > max ? g.groupEnd : max),
-      productGroups[0]?.groupEnd ?? new Date(),
-    )
+    const locationStart = earliest(productGroups.map((g) => g.groupStart))
+    const locationEnd = latest(productGroups.map((g) => g.groupEnd))
 
     locationGroups.push({
       locationId,
@@ -65,8 +77,14 @@ export function groupAssets(assets: ParsedAsset[]): LocationGroup[] {
     })
   }
 
-  // Sort locations by end date
-  locationGroups.sort((a, b) => a.locationEnd.getTime() - b.locationEnd.getTime())
+  // Order locations by urgency: soonest (earliest) contract end first — a location
+  // with any overdue asset surfaces above fully-live ones, even when it also holds
+  // far-future contracts. Keyed on contractEnd, NOT barEnd.
+  locationGroups.sort(
+    (a, b) =>
+      earliest(a.productGroups.flatMap((g) => g.assets.map((x) => x.contractEnd))).getTime() -
+      earliest(b.productGroups.flatMap((g) => g.assets.map((x) => x.contractEnd))).getTime(),
+  )
 
   return locationGroups
 }

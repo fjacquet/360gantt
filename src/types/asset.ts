@@ -25,6 +25,10 @@ export interface ParsedAsset {
   contractEnd: Date
   /** Days until contract end (negative = already expired) */
   daysRemaining: number
+  /** Parsed END OF STANDARD SUPPORT date, or null if absent/unparseable */
+  endOfSupport: Date | null
+  /** Bar end date: contractEnd while the contract is live, else endOfSupport ?? contractEnd */
+  barEnd: Date
 }
 
 // Assets sharing the same product name within a location
@@ -33,7 +37,7 @@ export interface ProductGroup {
   assets: ParsedAsset[]
   /** Earliest install date across all assets in this group */
   groupStart: Date
-  /** Latest contract end date across all assets in this group */
+  /** Latest bar end across all assets in this group (extends to end-of-support for expired) */
   groupEnd: Date
 }
 
@@ -46,7 +50,7 @@ export interface LocationGroup {
   productGroups: ProductGroup[]
   /** Earliest install date across all products in this location */
   locationStart: Date
-  /** Latest contract end date across all products in this location */
+  /** Latest bar end across all products in this location */
   locationEnd: Date
 }
 

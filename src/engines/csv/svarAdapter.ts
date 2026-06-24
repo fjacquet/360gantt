@@ -50,7 +50,7 @@ export function toGanttData(locationGroups: LocationGroup[]): GanttData {
           id: idCounter++,
           text: `${asset.productName} (${asset.assetId})`,
           start: asset.installDate,
-          end: asset.contractEnd,
+          end: asset.barEnd,
           type: 'task',
           parent: productId,
           color,

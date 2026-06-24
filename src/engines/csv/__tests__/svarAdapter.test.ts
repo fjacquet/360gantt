@@ -25,6 +25,8 @@ function makeLocationGroup(): LocationGroup {
             installDate: new Date(2022, 0, 1),
             contractEnd: new Date(2027, 0, 1),
             daysRemaining: 730,
+            endOfSupport: null,
+            barEnd: new Date(2027, 0, 1),
           },
         ],
       },
@@ -70,5 +72,41 @@ describe('toGanttData', () => {
     const data = toGanttData([])
     expect(data.tasks).toHaveLength(0)
     expect(data.links).toHaveLength(0)
+  })
+
+  it('uses barEnd (not contractEnd) for the asset bar end', () => {
+    const group: LocationGroup = {
+      locationId: 'L1',
+      locationName: 'Main DC',
+      city: 'Geneva',
+      country: 'Switzerland',
+      locationStart: new Date(2022, 0, 1),
+      locationEnd: new Date(2030, 0, 1),
+      productGroups: [
+        {
+          productName: 'VxRail E660F',
+          groupStart: new Date(2022, 0, 1),
+          groupEnd: new Date(2030, 0, 1),
+          assets: [
+            {
+              assetId: 'EXP',
+              productName: 'VxRail E660F',
+              locationId: 'L1',
+              locationName: 'Main DC',
+              city: 'Geneva',
+              country: 'Switzerland',
+              installDate: new Date(2022, 0, 1),
+              contractEnd: new Date(2024, 0, 1),
+              daysRemaining: -100,
+              endOfSupport: new Date(2030, 0, 1),
+              barEnd: new Date(2030, 0, 1),
+            },
+          ],
+        },
+      ],
+    }
+    const data = toGanttData([group])
+    const leaf = data.tasks.find((t) => t.type === 'task')
+    expect(leaf?.end?.getFullYear()).toBe(2030)
   })
 })

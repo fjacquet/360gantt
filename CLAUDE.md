@@ -50,7 +50,7 @@ File drop/pick
 Pure functions, fully unit-tested, no React dependencies.
 
 - **headerResolver** — normalises Dell CSV column headers across EN/FR/IT/DE using `HEADER_ALIASES`. Throws if no recognised headers are found.
-- **assetFilter** — keeps only `PRODUCT TYPE = HARDWARE` + `SERVICES STATUS = Active` rows that have a parseable `CONTRACT END DATE`. Multi-language value matching via `HARDWARE_VALUES` / `ACTIVE_VALUES`.
+- **assetFilter** — keeps `PRODUCT TYPE = HARDWARE` rows that have a parseable `CONTRACT END DATE` (falling back to `END OF STANDARD SUPPORT`), **regardless of `SERVICES STATUS`** — lapsed/`Ended` contracts are shown too. Multi-language hardware matching via `HARDWARE_VALUES`. Each `ParsedAsset` also carries `endOfSupport` and `barEnd` (= `contractEnd` while live, or `endOfSupport ?? contractEnd` once expired, i.e. `daysRemaining < 0`).
 - **dateParser** — handles two Dell date formats: `"July 23, 2026"` (US long form) and `"4yr, 3mo, 1d"` (age-from-today offset).
 - **assetGrouper** — groups `ParsedAsset[]` by `locationId → productName`, computes `daysRemaining`, sorts by `contractEnd` ascending.
 - **svarAdapter** — converts `LocationGroup[]` into the flat SVAR task array. Integer IDs are assigned sequentially. Three-level hierarchy: location task (`parent` unset) → product group task (`parent=locationId`) → asset task (`parent=productId`). Bar colour set via `contractStatusColor`.
