@@ -54,11 +54,12 @@ export function groupAssets(assets: ParsedAsset[]): LocationGroup[] {
       productGroups.push({ productName, assets: productAssets, groupStart, groupEnd })
     }
 
-    // Order product groups by urgency: latest contract end (NOT barEnd), soonest first
+    // Order product groups by urgency: soonest (earliest) contract end first, so a
+    // group with any overdue asset surfaces even if it also holds far-future ones.
     productGroups.sort(
       (a, b) =>
-        latest(a.assets.map((x) => x.contractEnd)).getTime() -
-        latest(b.assets.map((x) => x.contractEnd)).getTime(),
+        earliest(a.assets.map((x) => x.contractEnd)).getTime() -
+        earliest(b.assets.map((x) => x.contractEnd)).getTime(),
     )
 
     const representative = assets.find((a) => a.locationId === locationId)
@@ -76,11 +77,13 @@ export function groupAssets(assets: ParsedAsset[]): LocationGroup[] {
     })
   }
 
-  // Order locations by urgency: latest contract end (NOT barEnd), soonest first
+  // Order locations by urgency: soonest (earliest) contract end first — a location
+  // with any overdue asset surfaces above fully-live ones, even when it also holds
+  // far-future contracts. Keyed on contractEnd, NOT barEnd.
   locationGroups.sort(
     (a, b) =>
-      latest(a.productGroups.flatMap((g) => g.assets.map((x) => x.contractEnd))).getTime() -
-      latest(b.productGroups.flatMap((g) => g.assets.map((x) => x.contractEnd))).getTime(),
+      earliest(a.productGroups.flatMap((g) => g.assets.map((x) => x.contractEnd))).getTime() -
+      earliest(b.productGroups.flatMap((g) => g.assets.map((x) => x.contractEnd))).getTime(),
   )
 
   return locationGroups

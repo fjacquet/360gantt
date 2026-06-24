@@ -106,10 +106,10 @@ describe('groupAssets', () => {
     expect(groups[0]?.locationId).toBe('L_EXPIRED')
   })
 
-  it('orders a mixed location group by its max contractEnd, not barEnd', () => {
+  it('surfaces a mixed location with overdue work above a fully-live location', () => {
     const assets: ParsedAsset[] = [
-      // Mixed group (same location + product): an overdue asset whose bar extends to 2030,
-      // plus a live sibling that caps the group's max contractEnd at 2027.
+      // Mixed group (same location + product): an overdue asset (2023, bar extends to
+      // 2030) plus a far-future live sibling (2029).
       makeAsset({
         assetId: 'EXP',
         locationId: 'L_MIX',
@@ -118,24 +118,24 @@ describe('groupAssets', () => {
         daysRemaining: -800,
       }),
       makeAsset({
-        assetId: 'LIVE',
+        assetId: 'FUTURE',
         locationId: 'L_MIX',
-        contractEnd: new Date(2027, 0, 1),
-        barEnd: new Date(2027, 0, 1),
-        daysRemaining: 600,
+        contractEnd: new Date(2029, 0, 1),
+        barEnd: new Date(2029, 0, 1),
+        daysRemaining: 1500,
       }),
-      // A separate, later single-asset location.
+      // A fully-live location whose contract ends 2026.
       makeAsset({
-        locationId: 'L_LATE',
-        contractEnd: new Date(2028, 0, 1),
-        barEnd: new Date(2028, 0, 1),
-        daysRemaining: 900,
+        locationId: 'L_LIVE',
+        contractEnd: new Date(2026, 0, 1),
+        barEnd: new Date(2026, 0, 1),
+        daysRemaining: 365,
       }),
     ]
     const groups = groupAssets(assets)
-    // L_MIX's sort key is its max contractEnd (2027), NOT its max barEnd (2030),
-    // so it precedes L_LATE (2028). If the aggregate sort keyed on barEnd, L_MIX
-    // (2030) would sort last — this pins that it keys on contractEnd.
-    expect(groups.map((g) => g.locationId)).toEqual(['L_MIX', 'L_LATE'])
+    // L_MIX's urgency is its SOONEST contract end (2023, overdue), so it sorts above
+    // L_LIVE (2026) despite also holding a 2029 contract. If ordering keyed on the
+    // latest contract end (2029) — or on barEnd (2030) — L_MIX would sort BELOW L_LIVE.
+    expect(groups.map((g) => g.locationId)).toEqual(['L_MIX', 'L_LIVE'])
   })
 })
