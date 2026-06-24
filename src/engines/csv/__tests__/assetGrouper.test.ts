@@ -105,4 +105,37 @@ describe('groupAssets', () => {
     const groups = groupAssets(assets)
     expect(groups[0]?.locationId).toBe('L_EXPIRED')
   })
+
+  it('orders a mixed location group by its max contractEnd, not barEnd', () => {
+    const assets: ParsedAsset[] = [
+      // Mixed group (same location + product): an overdue asset whose bar extends to 2030,
+      // plus a live sibling that caps the group's max contractEnd at 2027.
+      makeAsset({
+        assetId: 'EXP',
+        locationId: 'L_MIX',
+        contractEnd: new Date(2023, 0, 1),
+        barEnd: new Date(2030, 0, 1),
+        daysRemaining: -800,
+      }),
+      makeAsset({
+        assetId: 'LIVE',
+        locationId: 'L_MIX',
+        contractEnd: new Date(2027, 0, 1),
+        barEnd: new Date(2027, 0, 1),
+        daysRemaining: 600,
+      }),
+      // A separate, later single-asset location.
+      makeAsset({
+        locationId: 'L_LATE',
+        contractEnd: new Date(2028, 0, 1),
+        barEnd: new Date(2028, 0, 1),
+        daysRemaining: 900,
+      }),
+    ]
+    const groups = groupAssets(assets)
+    // L_MIX's sort key is its max contractEnd (2027), NOT its max barEnd (2030),
+    // so it precedes L_LATE (2028). If the aggregate sort keyed on barEnd, L_MIX
+    // (2030) would sort last — this pins that it keys on contractEnd.
+    expect(groups.map((g) => g.locationId)).toEqual(['L_MIX', 'L_LATE'])
+  })
 })

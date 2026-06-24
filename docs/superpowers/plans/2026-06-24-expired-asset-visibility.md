@@ -20,7 +20,7 @@
 - **Tests use Vitest globals:** do NOT import `describe`/`it`/`expect`.
 - **Engine layer is pure functions, no React imports.**
 - **Every commit message must end with these two trailers** (verbatim):
-  ```
+  ```text
   Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
   Claude-Session: https://claude.ai/code/session_01PwjvYFwpYKQ3NvfnZtHtn2
   ```
