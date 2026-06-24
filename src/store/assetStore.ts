@@ -60,12 +60,18 @@ interface AssetState {
   reset: () => void
 }
 
+const makeInitialFilters = (): Filters => ({
+  locationIds: [],
+  search: '',
+  statuses: [...STATUS_ORDER],
+})
+
 const initialState = {
   loading: false,
   error: null,
   locationGroups: [],
   ganttData: { tasks: [], links: [] },
-  filters: { locationIds: [], search: '', statuses: [...STATUS_ORDER] },
+  filters: makeInitialFilters(),
   totalAssets: 0,
   fileName: null,
   zoomLevel: DEFAULT_ZOOM_IDX,
@@ -79,7 +85,15 @@ export const useAssetStore = create<AssetState>()((set, get) => ({
   setError: (error) => set({ error, loading: false }),
 
   setData: (locationGroups, ganttData, totalAssets, fileName) =>
-    set({ locationGroups, ganttData, totalAssets, fileName, error: null, loading: false }),
+    set({
+      locationGroups,
+      ganttData,
+      totalAssets,
+      fileName,
+      error: null,
+      loading: false,
+      filters: makeInitialFilters(),
+    }),
 
   setFilters: (partial) =>
     set((state) => ({ filters: { ...state.filters, ...partial } })),

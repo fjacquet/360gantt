@@ -25,7 +25,8 @@ function makeAsset(over: Partial<ParsedAsset> = {}): ParsedAsset {
 const okA = makeAsset({ assetId: 'OK', locationId: 'L1', daysRemaining: 1000 })
 const expA = makeAsset({ assetId: 'EXP', locationId: 'L1', daysRemaining: -50 })
 const critA = makeAsset({ assetId: 'CRIT', locationId: 'L2', daysRemaining: 100 })
-const groups = groupAssets([okA, expA, critA])
+const warnA = makeAsset({ assetId: 'WARN', locationId: 'L3', daysRemaining: 500 })
+const groups = groupAssets([okA, expA, critA, warnA])
 
 function assetIds(gs: ReturnType<typeof groupAssets>): string[] {
   return gs.flatMap((g) => g.productGroups.flatMap((pg) => pg.assets.map((a) => a.assetId))).sort()
@@ -50,5 +51,10 @@ describe('filterGroupsByStatus', () => {
 
   it('returns an empty array when no statuses are visible', () => {
     expect(filterGroupsByStatus(groups, [])).toEqual([])
+  })
+
+  it('keeps only warning-bucket assets when filtered to warning', () => {
+    const out = filterGroupsByStatus(groups, ['warning'])
+    expect(assetIds(out)).toEqual(['WARN'])
   })
 })
