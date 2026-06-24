@@ -21,3 +21,6 @@ export const STATUS_COLORS: Record<ContractStatus, string> = {
   critical: '#003B6F',
   expired: '#9ca3af',
 }
+
+/** Canonical ordered list of all contract-status buckets (widest scope first). */
+export const STATUS_ORDER: ContractStatus[] = ['ok', 'warning', 'critical', 'expired']
