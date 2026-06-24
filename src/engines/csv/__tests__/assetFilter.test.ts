@@ -25,8 +25,8 @@ describe('isIncluded', () => {
     expect(isIncluded({ ...baseAsset, productType: 'SOFTWARE' })).toBe(false)
   })
 
-  it('excludes non-active status', () => {
-    expect(isIncluded({ ...baseAsset, servicesStatus: 'Ended' })).toBe(false)
+  it('includes non-active (ended) hardware', () => {
+    expect(isIncluded({ ...baseAsset, servicesStatus: 'Ended' })).toBe(true)
   })
 
   it('excludes missing contract end date', () => {
@@ -133,15 +133,15 @@ describe('toRawAsset', () => {
 })
 
 describe('filterAssets', () => {
-  it('returns only parseable hardware/active assets', () => {
+  it('returns all parseable hardware assets regardless of status', () => {
     const raws: RawAsset[] = [
       { ...baseAsset, assetId: 'KEEP' },
       { ...baseAsset, assetId: 'SKIP_SW', productType: 'SOFTWARE' },
-      { ...baseAsset, assetId: 'SKIP_END', servicesStatus: 'Ended' },
+      { ...baseAsset, assetId: 'ENDED', servicesStatus: 'Ended' },
     ]
     const parsed = filterAssets(raws)
-    expect(parsed).toHaveLength(1)
-    expect(parsed[0]?.assetId).toBe('KEEP')
+    expect(parsed).toHaveLength(2)
+    expect(parsed.map((p) => p.assetId).sort()).toEqual(['ENDED', 'KEEP'])
   })
 
   it('returns empty array when nothing matches', () => {

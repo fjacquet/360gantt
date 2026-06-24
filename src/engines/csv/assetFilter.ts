@@ -1,4 +1,4 @@
-import { ACTIVE_VALUES, HARDWARE_VALUES, type FieldMap } from './headerResolver'
+import { HARDWARE_VALUES, type FieldMap } from './headerResolver'
 import { parseContractDate, parseInstallBaseAge } from './dateParser'
 import type { ParsedAsset, RawAsset } from '@/types/asset'
 
@@ -29,15 +29,11 @@ export function toRawAsset(row: Record<string, string>, fieldMap: FieldMap): Raw
 /**
  * Returns true if the raw asset should be included in the Gantt chart:
  *  - product type is HARDWARE (any language)
- *  - services status is Active (any language)
  *  - has a parseable contract end date (or end of standard support)
  */
 export function isIncluded(raw: RawAsset): boolean {
   const typeUpper = raw.productType.toUpperCase()
   if (!HARDWARE_VALUES.some((v) => v.toUpperCase() === typeUpper)) return false
-
-  const statusLower = raw.servicesStatus.toLowerCase()
-  if (!ACTIVE_VALUES.some((v) => v.toLowerCase() === statusLower)) return false
 
   const contractEnd =
     parseContractDate(raw.contractEndDate) ?? parseContractDate(raw.endOfStandardSupport)
