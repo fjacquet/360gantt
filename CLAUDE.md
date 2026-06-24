@@ -59,7 +59,7 @@ Pure functions, fully unit-tested, no React dependencies.
 
 Single Zustand store. Key slices:
 - `ganttData` / `locationGroups` — output of the pipeline
-- `filters` — `{ locationIds: string[], search: string }` — filtering applied inside `GanttPanel`, not in the store
+- `filters` — `{ locationIds: string[], search: string, statuses: ContractStatus[] }` — the active filter **selection** (locations, product search, and visible contract-status buckets, default all of `STATUS_ORDER`). The filtering itself is applied inside `GanttPanel` (locations + `filterGroupsByStatus` for status) and `applySearchFilter`, **not** in the store. Reset to defaults on every `setData` via `makeInitialFilters()`.
 - `zoomLevel` — index into `ZOOM_PRESETS` (time-axis: 5-year/Year/Quarter/Month)
 - `scaleIdx` — index into `SCALE_STEPS` (CSS zoom: 0.5× … 2.0×, default 1.0)
 
