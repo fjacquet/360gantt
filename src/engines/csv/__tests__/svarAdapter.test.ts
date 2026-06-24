@@ -25,6 +25,8 @@ function makeLocationGroup(): LocationGroup {
             installDate: new Date(2022, 0, 1),
             contractEnd: new Date(2027, 0, 1),
             daysRemaining: 730,
+            endOfSupport: null,
+            barEnd: new Date(2027, 0, 1),
           },
         ],
       },

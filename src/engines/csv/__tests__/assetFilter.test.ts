@@ -148,3 +148,34 @@ describe('filterAssets', () => {
     expect(filterAssets([{ ...baseAsset, productType: 'SOFTWARE' }])).toHaveLength(0)
   })
 })
+
+describe('barEnd / endOfSupport', () => {
+  const today = new Date(2025, 0, 1)
+
+  it('uses contractEnd as barEnd for a live contract', () => {
+    const parsed = toParsedAsset(
+      { ...baseAsset, contractEndDate: 'December 31, 2027', endOfStandardSupport: 'June 30, 2030' },
+      today,
+    )
+    expect(parsed.barEnd.getTime()).toBe(parsed.contractEnd.getTime())
+    expect(parsed.endOfSupport?.getFullYear()).toBe(2030)
+  })
+
+  it('extends barEnd to endOfSupport for an expired contract', () => {
+    const parsed = toParsedAsset(
+      { ...baseAsset, contractEndDate: 'February 01, 2020', endOfStandardSupport: 'June 30, 2030' },
+      today,
+    )
+    expect(parsed.daysRemaining).toBeLessThan(0)
+    expect(parsed.barEnd.getFullYear()).toBe(2030)
+  })
+
+  it('falls back to contractEnd as barEnd when an expired contract has no endOfSupport', () => {
+    const parsed = toParsedAsset(
+      { ...baseAsset, contractEndDate: 'February 01, 2020', endOfStandardSupport: '' },
+      today,
+    )
+    expect(parsed.endOfSupport).toBeNull()
+    expect(parsed.barEnd.getTime()).toBe(parsed.contractEnd.getTime())
+  })
+})

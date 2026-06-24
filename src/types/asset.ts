@@ -25,6 +25,10 @@ export interface ParsedAsset {
   contractEnd: Date
   /** Days until contract end (negative = already expired) */
   daysRemaining: number
+  /** Parsed END OF STANDARD SUPPORT date, or null if absent/unparseable */
+  endOfSupport: Date | null
+  /** Bar end date: contractEnd while the contract is live, else endOfSupport ?? contractEnd */
+  barEnd: Date
 }
 
 // Assets sharing the same product name within a location

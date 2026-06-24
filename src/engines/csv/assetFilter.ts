@@ -55,6 +55,9 @@ export function toParsedAsset(raw: RawAsset, today = new Date()): ParsedAsset {
     (contractEnd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
   )
 
+  const endOfSupport = parseContractDate(raw.endOfStandardSupport)
+  const barEnd = daysRemaining < 0 ? (endOfSupport ?? contractEnd) : contractEnd
+
   return {
     assetId: raw.assetId,
     productName: raw.productName,
@@ -65,6 +68,8 @@ export function toParsedAsset(raw: RawAsset, today = new Date()): ParsedAsset {
     installDate,
     contractEnd,
     daysRemaining,
+    endOfSupport,
+    barEnd,
   }
 }
 

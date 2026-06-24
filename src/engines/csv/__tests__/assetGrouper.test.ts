@@ -2,6 +2,7 @@ import { groupAssets } from '../assetGrouper'
 import type { ParsedAsset } from '@/types/asset'
 
 function makeAsset(overrides: Partial<ParsedAsset> = {}): ParsedAsset {
+  const contractEnd = overrides.contractEnd ?? new Date(2027, 0, 1)
   return {
     assetId: 'A1',
     productName: 'PowerEdge R740',
@@ -10,9 +11,11 @@ function makeAsset(overrides: Partial<ParsedAsset> = {}): ParsedAsset {
     city: 'Geneva',
     country: 'Switzerland',
     installDate: new Date(2022, 0, 1),
-    contractEnd: new Date(2027, 0, 1),
     daysRemaining: 730,
+    endOfSupport: null,
     ...overrides,
+    contractEnd,
+    barEnd: overrides.barEnd ?? contractEnd,
   }
 }
 
