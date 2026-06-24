@@ -19,7 +19,9 @@
     "search": "Cerca prodotti…",
     "locations": "Sedi",
     "allLocations": "Tutte le sedi",
-    "clear": "Cancella filtri"
+    "clear": "Cancella filtri",
+    "legend": "Legenda",
+    "showAll": "Mostra tutto"
   },
   "gantt": {
     "noData": "Carica un file CSV per visualizzare il diagramma di Gantt",

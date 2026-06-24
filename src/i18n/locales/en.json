@@ -19,7 +19,9 @@
     "search": "Search products…",
     "locations": "Locations",
     "allLocations": "All locations",
-    "clear": "Clear filters"
+    "clear": "Clear filters",
+    "legend": "Legend",
+    "showAll": "Show all"
   },
   "gantt": {
     "noData": "Load a CSV file to see the Gantt chart",
