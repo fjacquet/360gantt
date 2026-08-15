@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react'
 
 /** Returns true when the OS/browser prefers dark colour scheme. */
 export function useDarkMode(): boolean {
-  const [dark, setDark] = useState(
-    () => window.matchMedia('(prefers-color-scheme: dark)').matches,
-  )
+  const [dark, setDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')

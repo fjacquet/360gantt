@@ -22,36 +22,31 @@ export type FieldMap = Record<CanonicalField, string>
 
 /** Multi-language aliases for each canonical field */
 const HEADER_ALIASES: Record<CanonicalField, string[]> = {
-  assetId: ['ASSET ID', "ID D'ACTIF", "ID D\u2019ACTIF", 'ID ASSET', 'ASSET-ID'],
+  assetId: ['ASSET ID', "ID D'ACTIF", 'ID D\u2019ACTIF', 'ID ASSET', 'ASSET-ID'],
   productName: ['PRODUCT NAME', 'NOM DU PRODUIT', 'NOME DEL PRODOTTO', 'PRODUKTNAME'],
   productType: ['PRODUCT TYPE', 'TYPE DE PRODUIT', 'TIPO DI PRODOTTO', 'PRODUKTTYP'],
   installBaseAge: [
     'INSTALL BASE AGE',
     "ÂGE DE LA BASE D'INSTALLATION",
-    "ÂGE DE LA BASE D\u2019INSTALLATION",
+    'ÂGE DE LA BASE D\u2019INSTALLATION',
     'ETÀ BASE INSTALLATA',
     'ALTER DER INSTALLATIONSBASIS',
   ],
   locationId: [
     'LOCATION ID',
     "ID D'EMPLACEMENT",
-    "ID D\u2019EMPLACEMENT",
+    'ID D\u2019EMPLACEMENT',
     'ID POSIZIONE',
     'STANDORT-ID',
   ],
   locationName: [
     'LOCATION NAME',
     "NOM DE L'EMPLACEMENT",
-    "NOM DE L\u2019EMPLACEMENT",
+    'NOM DE L\u2019EMPLACEMENT',
     'NOME POSIZIONE',
     'STANDORTNAME',
   ],
-  servicesStatus: [
-    'SERVICES STATUS',
-    'STATUT DES SERVICES',
-    'STATO DEI SERVIZI',
-    'SERVICESTATUS',
-  ],
+  servicesStatus: ['SERVICES STATUS', 'STATUT DES SERVICES', 'STATO DEI SERVIZI', 'SERVICESTATUS'],
   contractEndDate: [
     'CONTRACT END DATE',
     'DATE DE FIN DU CONTRAT',

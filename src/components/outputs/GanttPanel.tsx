@@ -1,10 +1,10 @@
-import { forwardRef } from 'react'
-import type { CSSProperties } from 'react'
-import { SCALE_STEPS, ZOOM_PRESETS, useAssetStore } from '@store/assetStore'
-import { useDarkMode } from '@hooks/useDarkMode'
-import { toGanttData } from '@engines/csv/svarAdapter'
 import { filterGroupsByStatus } from '@engines/csv/statusFilter'
+import { toGanttData } from '@engines/csv/svarAdapter'
+import { useDarkMode } from '@hooks/useDarkMode'
+import { SCALE_STEPS, useAssetStore, ZOOM_PRESETS } from '@store/assetStore'
 import { STATUS_ORDER } from '@utils/colors'
+import type { CSSProperties } from 'react'
+import { forwardRef } from 'react'
 import type { GanttTask } from '@/types/gantt'
 import { SvgGantt } from './gantt'
 
@@ -47,13 +47,15 @@ export const GanttPanel = forwardRef<HTMLDivElement, GanttPanelProps>(function G
     <div
       ref={ref}
       className={className}
-      style={{
-        position: 'absolute',
-        inset: 0,
-        overflow: 'auto',
-        zoom: cssZoom,
-        ...style,
-      } as CSSProperties}
+      style={
+        {
+          position: 'absolute',
+          inset: 0,
+          overflow: 'auto',
+          zoom: cssZoom,
+          ...style,
+        } as CSSProperties
+      }
     >
       <SvgGantt tasks={tasks} scales={scales} dark={dark} />
     </div>

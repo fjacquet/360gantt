@@ -15,7 +15,20 @@ export interface TimeAxisData {
   endDate: Date
 }
 
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
 
 export function formatLabel(date: Date, format: string): string {
   if (format === '%Y') return String(date.getFullYear())
@@ -92,7 +105,11 @@ export function computeTimeAxis(
 
   // Pad: align start to the beginning of its coarse period, end to one period after
   const startDate = alignDate(minDate, topScale.unit, topScale.step)
-  const endDate = stepDate(alignDate(maxDate, topScale.unit, topScale.step), topScale.unit, topScale.step)
+  const endDate = stepDate(
+    alignDate(maxDate, topScale.unit, topScale.step),
+    topScale.unit,
+    topScale.step,
+  )
 
   // Build bottom row columns
   const bottomRow: TimeColumn[] = []

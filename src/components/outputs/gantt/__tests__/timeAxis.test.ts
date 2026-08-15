@@ -1,6 +1,6 @@
-import { computeTimeAxis, dateToX, formatLabel } from '../timeAxis'
-import type { GanttTask } from '@/types/gantt'
 import type { ZoomScale } from '@store/assetStore'
+import type { GanttTask } from '@/types/gantt'
+import { computeTimeAxis, dateToX, formatLabel } from '../timeAxis'
 
 const yearScales: ZoomScale[] = [
   { unit: 'year', step: 1, format: '%Y' },
