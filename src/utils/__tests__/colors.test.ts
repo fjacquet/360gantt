@@ -1,4 +1,4 @@
-import { contractStatusColor, contractStatus, STATUS_COLORS } from '../colors'
+import { contractStatus, contractStatusColor, STATUS_COLORS } from '../colors'
 
 describe('contractStatusColor', () => {
   it('returns gray for expired contracts', () => {

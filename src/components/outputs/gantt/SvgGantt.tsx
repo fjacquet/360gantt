@@ -54,7 +54,7 @@ export function SvgGantt({ tasks, scales, dark = false }: SvgGanttProps) {
       <rect width={totalWidth} height={totalHeight} fill={bg} />
 
       {/* Alternating row stripes */}
-      {tasks.map((_, i) => (
+      {tasks.map((_, i) =>
         i % 2 === 1 ? (
           <rect
             key={`stripe-${tasks[i]?.id}`}
@@ -64,8 +64,8 @@ export function SvgGantt({ tasks, scales, dark = false }: SvgGanttProps) {
             height={ROW_HEIGHT}
             fill={stripeBg}
           />
-        ) : null
-      ))}
+        ) : null,
+      )}
 
       {/* Vertical grid lines at column boundaries */}
       {axis.bottomRow.map((col) => (
@@ -133,7 +133,7 @@ export function SvgGantt({ tasks, scales, dark = false }: SvgGanttProps) {
           />
           <text
             x={LABEL_COL + col.x + col.width / 2}
-            y={HEADER_HEIGHT * 3 / 4 + 4}
+            y={(HEADER_HEIGHT * 3) / 4 + 4}
             textAnchor="middle"
             fill={textMuted}
             fontSize={10}
@@ -144,7 +144,14 @@ export function SvgGantt({ tasks, scales, dark = false }: SvgGanttProps) {
       ))}
 
       {/* Header bottom border */}
-      <line x1={0} y1={HEADER_HEIGHT} x2={totalWidth} y2={HEADER_HEIGHT} stroke={dividerLine} strokeWidth={1} />
+      <line
+        x1={0}
+        y1={HEADER_HEIGHT}
+        x2={totalWidth}
+        y2={HEADER_HEIGHT}
+        stroke={dividerLine}
+        strokeWidth={1}
+      />
 
       {/* Left panel background */}
       <rect x={0} y={0} width={LABEL_COL} height={totalHeight} fill={labelBg} />
@@ -165,11 +172,12 @@ export function SvgGantt({ tasks, scales, dark = false }: SvgGanttProps) {
       {/* Left panel text labels */}
       <g clipPath="url(#label-clip)">
         {tasks.map((task, i) => {
-          const indent = task.parent === undefined || task.parent === 0
-            ? 0
-            : task.type === 'summary'
-              ? INDENT
-              : INDENT * 2
+          const indent =
+            task.parent === undefined || task.parent === 0
+              ? 0
+              : task.type === 'summary'
+                ? INDENT
+                : INDENT * 2
           return (
             <text
               key={`label-${task.id}`}
@@ -234,7 +242,14 @@ export function SvgGantt({ tasks, scales, dark = false }: SvgGanttProps) {
       )}
 
       {/* Divider line between label panel and chart */}
-      <line x1={LABEL_COL} y1={0} x2={LABEL_COL} y2={totalHeight} stroke={dividerLine} strokeWidth={1} />
+      <line
+        x1={LABEL_COL}
+        y1={0}
+        x2={LABEL_COL}
+        y2={totalHeight}
+        stroke={dividerLine}
+        strokeWidth={1}
+      />
     </svg>
   )
 }

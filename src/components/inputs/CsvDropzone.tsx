@@ -1,7 +1,7 @@
-import { type DragEvent, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useCsvParse } from '@hooks/useCsvParse'
 import { useAssetStore } from '@store/assetStore'
+import { type DragEvent, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface CsvDropzoneProps {
   compact?: boolean
@@ -40,8 +40,19 @@ export function CsvDropzone({ compact = false }: CsvDropzoneProps) {
   }
 
   const uploadIcon = (
-    <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+    <svg
+      className="h-4 w-4 shrink-0"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"
+      />
     </svg>
   )
 
@@ -65,7 +76,13 @@ export function CsvDropzone({ compact = false }: CsvDropzoneProps) {
         <span className="max-w-32 truncate">
           {loading ? t('dropzone.loading') : fileName || t('dropzone.title')}
         </span>
-        <input ref={inputRef} type="file" accept=".csv,text/csv" className="sr-only" onChange={onInputChange} />
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="sr-only"
+          onChange={onInputChange}
+        />
       </button>
     )
   }

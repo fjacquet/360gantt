@@ -1,9 +1,9 @@
-import { type RefObject, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { ZOOM_PRESETS, SCALE_STEPS, useAssetStore } from '@store/assetStore'
-import { useExport } from '@hooks/useExport'
 import { CsvDropzone } from '@components/inputs/CsvDropzone'
 import { FilterPanel } from '@components/inputs/FilterPanel'
+import { useExport } from '@hooks/useExport'
+import { SCALE_STEPS, useAssetStore, ZOOM_PRESETS } from '@store/assetStore'
+import { type RefObject, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n/config'
 
 interface HeaderProps {
@@ -12,8 +12,17 @@ interface HeaderProps {
 
 export function Header({ ganttRef }: HeaderProps) {
   const { t } = useTranslation()
-  const { ganttData, totalAssets, locationGroups, zoomLevel, zoomIn, zoomOut, scaleIdx, scaleUp, scaleDown } =
-    useAssetStore()
+  const {
+    ganttData,
+    totalAssets,
+    locationGroups,
+    zoomLevel,
+    zoomIn,
+    zoomOut,
+    scaleIdx,
+    scaleUp,
+    scaleDown,
+  } = useAssetStore()
   const { exportPng, exportPdf, exportPptx, exportMermaid } = useExport(ganttRef)
   const hasData = ganttData.tasks.length > 0
   const [filterOpen, setFilterOpen] = useState(false)
@@ -58,11 +67,29 @@ export function Header({ ganttRef }: HeaderProps) {
                 onClick={() => setFilterOpen((v) => !v)}
                 className="flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
               >
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
+                  />
                 </svg>
                 {t('filter.locations')}
-                <svg className={`h-3 w-3 transition-transform ${filterOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <svg
+                  className={`h-3 w-3 transition-transform ${filterOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>

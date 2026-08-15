@@ -1,6 +1,6 @@
-import { toast } from 'sonner'
 import { NoAssetsError, parseCsvToGantt } from '@engines/csv/pipeline'
 import { useAssetStore } from '@store/assetStore'
+import { toast } from 'sonner'
 
 export function useCsvParse() {
   const { setLoading, setError, setData } = useAssetStore()

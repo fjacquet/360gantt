@@ -1,9 +1,9 @@
 import { Buffer } from 'node:buffer'
 import { writeFile } from 'node:fs/promises'
 import { extname } from 'node:path'
+import { toMermaid } from '@engines/csv/mermaid'
 import { jsPDF } from 'jspdf'
 import PptxGenJS from 'pptxgenjs'
-import { toMermaid } from '@engines/csv/mermaid'
 import type { GanttTask } from '@/types/gantt'
 import { svgToPng } from './rasterize'
 
@@ -62,7 +62,11 @@ async function writePdf(svg: string, outPath: string): Promise<void> {
   const { data, width, height } = await svgToPng(svg)
   const w = width / 2
   const h = height / 2
-  const doc = new jsPDF({ orientation: w >= h ? 'landscape' : 'portrait', unit: 'pt', format: [w, h] })
+  const doc = new jsPDF({
+    orientation: w >= h ? 'landscape' : 'portrait',
+    unit: 'pt',
+    format: [w, h],
+  })
   doc.addImage(toDataUri(data), 'PNG', 0, 0, w, h)
   const pdfBytes = doc.output('arraybuffer') as ArrayBuffer
   await writeFile(outPath, Buffer.from(pdfBytes))

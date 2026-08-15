@@ -1,6 +1,6 @@
 import { create } from 'zustand'
-import type { GanttData } from '@/types/gantt'
 import type { ContractStatus, LocationGroup } from '@/types/asset'
+import type { GanttData } from '@/types/gantt'
 import { STATUS_ORDER } from '@/utils/colors'
 
 export interface Filters {
@@ -22,18 +22,24 @@ export interface ZoomScale {
 export const ZOOM_PRESETS: { label: string; scales: ZoomScale[] }[] = [
   {
     label: '5-year',
-    scales: [{ unit: 'year', step: 5, format: '%Y' }, { unit: 'year', step: 1, format: '%Y' }],
+    scales: [
+      { unit: 'year', step: 5, format: '%Y' },
+      { unit: 'year', step: 1, format: '%Y' },
+    ],
   },
   {
     label: 'Year',
-    scales: [{ unit: 'year', step: 1, format: '%Y' }, { unit: 'month', step: 6, format: '%M' }],
+    scales: [
+      { unit: 'year', step: 1, format: '%Y' },
+      { unit: 'month', step: 6, format: '%M' },
+    ],
   },
 ]
 
 /** Visual scale steps: CSS zoom applied to the whole Gantt canvas */
 export const SCALE_STEPS = [0.5, 0.67, 0.75, 0.9, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0]
 const DEFAULT_SCALE_IDX = 4 // 1.0 = 100%
-const DEFAULT_ZOOM_IDX = 1  // Year
+const DEFAULT_ZOOM_IDX = 1 // Year
 
 interface AssetState {
   loading: boolean
@@ -50,7 +56,12 @@ interface AssetState {
 
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
-  setData: (locationGroups: LocationGroup[], ganttData: GanttData, totalAssets: number, fileName: string) => void
+  setData: (
+    locationGroups: LocationGroup[],
+    ganttData: GanttData,
+    totalAssets: number,
+    fileName: string,
+  ) => void
   setFilters: (filters: Partial<Filters>) => void
   setZoom: (level: number) => void
   zoomIn: () => void
@@ -95,11 +106,9 @@ export const useAssetStore = create<AssetState>()((set, get) => ({
       filters: makeInitialFilters(),
     }),
 
-  setFilters: (partial) =>
-    set((state) => ({ filters: { ...state.filters, ...partial } })),
+  setFilters: (partial) => set((state) => ({ filters: { ...state.filters, ...partial } })),
 
-  setZoom: (level) =>
-    set({ zoomLevel: Math.max(0, Math.min(ZOOM_PRESETS.length - 1, level)) }),
+  setZoom: (level) => set({ zoomLevel: Math.max(0, Math.min(ZOOM_PRESETS.length - 1, level)) }),
 
   zoomIn: () => {
     const { zoomLevel } = get()

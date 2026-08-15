@@ -2,9 +2,30 @@ import type { GanttTask } from '@/types/gantt'
 import { toMermaid } from '../mermaid'
 
 const tasks: GanttTask[] = [
-  { id: 1, text: 'Main DC', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary' },
-  { id: 2, text: 'PowerEdge R740', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary', parent: 1 },
-  { id: 3, text: 'R740 (A1)', start: new Date(2024, 0, 1), end: new Date(2026, 5, 30), type: 'task', parent: 2, color: '#0076ce' },
+  {
+    id: 1,
+    text: 'Main DC',
+    start: new Date(2024, 0, 1),
+    end: new Date(2027, 0, 1),
+    type: 'summary',
+  },
+  {
+    id: 2,
+    text: 'PowerEdge R740',
+    start: new Date(2024, 0, 1),
+    end: new Date(2027, 0, 1),
+    type: 'summary',
+    parent: 1,
+  },
+  {
+    id: 3,
+    text: 'R740 (A1)',
+    start: new Date(2024, 0, 1),
+    end: new Date(2026, 5, 30),
+    type: 'task',
+    parent: 2,
+    color: '#0076ce',
+  },
 ]
 
 describe('toMermaid', () => {
@@ -24,35 +45,111 @@ describe('toMermaid', () => {
 
   it('emits a crit status for the Dell dark-blue bar', () => {
     const t: GanttTask[] = [
-      { id: 1, text: 'DC', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary' },
-      { id: 2, text: 'Server', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary', parent: 1 },
-      { id: 3, text: 'A1', start: new Date(2024, 0, 1), end: new Date(2025, 0, 1), type: 'task', parent: 2, color: '#003b6f' },
+      {
+        id: 1,
+        text: 'DC',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'summary',
+      },
+      {
+        id: 2,
+        text: 'Server',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'summary',
+        parent: 1,
+      },
+      {
+        id: 3,
+        text: 'A1',
+        start: new Date(2024, 0, 1),
+        end: new Date(2025, 0, 1),
+        type: 'task',
+        parent: 2,
+        color: '#003b6f',
+      },
     ]
     expect(toMermaid(t)).toContain('crit, 2024-01-01, 2025-01-01')
   })
 
   it('emits a done status for the gray bar', () => {
     const t: GanttTask[] = [
-      { id: 1, text: 'DC', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary' },
-      { id: 2, text: 'Server', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary', parent: 1 },
-      { id: 3, text: 'A1', start: new Date(2024, 0, 1), end: new Date(2025, 0, 1), type: 'task', parent: 2, color: '#9ca3af' },
+      {
+        id: 1,
+        text: 'DC',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'summary',
+      },
+      {
+        id: 2,
+        text: 'Server',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'summary',
+        parent: 1,
+      },
+      {
+        id: 3,
+        text: 'A1',
+        start: new Date(2024, 0, 1),
+        end: new Date(2025, 0, 1),
+        type: 'task',
+        parent: 2,
+        color: '#9ca3af',
+      },
     ]
     expect(toMermaid(t)).toContain('done, 2024-01-01, 2025-01-01')
   })
 
   it('emits no status keyword for an unknown bar colour', () => {
     const t: GanttTask[] = [
-      { id: 1, text: 'DC', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary' },
-      { id: 2, text: 'Server', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary', parent: 1 },
-      { id: 3, text: 'A1', start: new Date(2024, 0, 1), end: new Date(2025, 0, 1), type: 'task', parent: 2, color: '#abcdef' },
+      {
+        id: 1,
+        text: 'DC',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'summary',
+      },
+      {
+        id: 2,
+        text: 'Server',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'summary',
+        parent: 1,
+      },
+      {
+        id: 3,
+        text: 'A1',
+        start: new Date(2024, 0, 1),
+        end: new Date(2025, 0, 1),
+        type: 'task',
+        parent: 2,
+        color: '#abcdef',
+      },
     ]
     expect(toMermaid(t)).toContain('A1 :2024-01-01, 2025-01-01')
   })
 
   it('falls back to the product summary row when it has no child assets', () => {
     const t: GanttTask[] = [
-      { id: 1, text: 'DC', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary' },
-      { id: 2, text: 'Server', start: new Date(2024, 0, 1), end: new Date(2026, 0, 1), type: 'summary', parent: 1 },
+      {
+        id: 1,
+        text: 'DC',
+        start: new Date(2024, 0, 1),
+        end: new Date(2027, 0, 1),
+        type: 'summary',
+      },
+      {
+        id: 2,
+        text: 'Server',
+        start: new Date(2024, 0, 1),
+        end: new Date(2026, 0, 1),
+        type: 'summary',
+        parent: 1,
+      },
     ]
     expect(toMermaid(t)).toContain('Server :2024-01-01, 2026-01-01')
   })

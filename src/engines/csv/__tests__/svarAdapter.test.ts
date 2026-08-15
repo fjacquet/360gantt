@@ -1,5 +1,5 @@
-import { toGanttData } from '../svarAdapter'
 import type { LocationGroup } from '@/types/asset'
+import { toGanttData } from '../svarAdapter'
 
 function makeLocationGroup(): LocationGroup {
   return {
@@ -40,8 +40,12 @@ describe('toGanttData', () => {
 
     const tasks = data.tasks
 
-    const locations = tasks.filter((t) => t.type === 'summary' && (t.parent === 0 || t.parent === undefined))
-    const products = tasks.filter((t) => t.type === 'summary' && t.parent !== 0 && t.parent !== undefined)
+    const locations = tasks.filter(
+      (t) => t.type === 'summary' && (t.parent === 0 || t.parent === undefined),
+    )
+    const products = tasks.filter(
+      (t) => t.type === 'summary' && t.parent !== 0 && t.parent !== undefined,
+    )
     const leaves = tasks.filter((t) => t.type === 'task')
 
     expect(locations).toHaveLength(1)
@@ -51,8 +55,12 @@ describe('toGanttData', () => {
 
   it('sets parent correctly on product tasks', () => {
     const data = toGanttData([makeLocationGroup()])
-    const locTask = data.tasks.find((t) => t.type === 'summary' && (t.parent === 0 || t.parent === undefined))
-    const prodTask = data.tasks.find((t) => t.type === 'summary' && t.parent !== undefined && t.parent !== 0)
+    const locTask = data.tasks.find(
+      (t) => t.type === 'summary' && (t.parent === 0 || t.parent === undefined),
+    )
+    const prodTask = data.tasks.find(
+      (t) => t.type === 'summary' && t.parent !== undefined && t.parent !== 0,
+    )
     expect(prodTask?.parent).toBe(locTask?.id)
   })
 
