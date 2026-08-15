@@ -1,5 +1,5 @@
-import { groupAssets } from '../assetGrouper'
 import type { ParsedAsset } from '@/types/asset'
+import { groupAssets } from '../assetGrouper'
 
 function makeAsset(overrides: Partial<ParsedAsset> = {}): ParsedAsset {
   const contractEnd = overrides.contractEnd ?? new Date(2027, 0, 1)
@@ -25,7 +25,12 @@ describe('groupAssets', () => {
       makeAsset({ assetId: 'A1', locationId: 'L1', productName: 'Server A' }),
       makeAsset({ assetId: 'A2', locationId: 'L1', productName: 'Server A' }),
       makeAsset({ assetId: 'B1', locationId: 'L1', productName: 'Storage B' }),
-      makeAsset({ assetId: 'C1', locationId: 'L2', productName: 'Server A', locationName: 'Remote DC' }),
+      makeAsset({
+        assetId: 'C1',
+        locationId: 'L2',
+        productName: 'Server A',
+        locationName: 'Remote DC',
+      }),
     ]
 
     const groups = groupAssets(assets)
@@ -40,8 +45,16 @@ describe('groupAssets', () => {
 
   it('computes groupStart as earliest installDate', () => {
     const assets: ParsedAsset[] = [
-      makeAsset({ assetId: 'A1', installDate: new Date(2020, 0, 1), contractEnd: new Date(2026, 0, 1) }),
-      makeAsset({ assetId: 'A2', installDate: new Date(2022, 0, 1), contractEnd: new Date(2028, 0, 1) }),
+      makeAsset({
+        assetId: 'A1',
+        installDate: new Date(2020, 0, 1),
+        contractEnd: new Date(2026, 0, 1),
+      }),
+      makeAsset({
+        assetId: 'A2',
+        installDate: new Date(2022, 0, 1),
+        contractEnd: new Date(2028, 0, 1),
+      }),
     ]
     const groups = groupAssets(assets)
     const pg = groups[0]?.productGroups[0]
@@ -64,8 +77,18 @@ describe('groupAssets', () => {
 
   it('computes locationStart/End across multiple product groups', () => {
     const assets: ParsedAsset[] = [
-      makeAsset({ assetId: 'A', productName: 'P1', installDate: new Date(2019, 0, 1), contractEnd: new Date(2025, 0, 1) }),
-      makeAsset({ assetId: 'B', productName: 'P2', installDate: new Date(2021, 0, 1), contractEnd: new Date(2030, 0, 1) }),
+      makeAsset({
+        assetId: 'A',
+        productName: 'P1',
+        installDate: new Date(2019, 0, 1),
+        contractEnd: new Date(2025, 0, 1),
+      }),
+      makeAsset({
+        assetId: 'B',
+        productName: 'P2',
+        installDate: new Date(2021, 0, 1),
+        contractEnd: new Date(2030, 0, 1),
+      }),
     ]
     const groups = groupAssets(assets)
     const loc = groups[0]

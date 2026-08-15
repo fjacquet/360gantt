@@ -3,8 +3,23 @@ import type { GanttTask } from '@/types/gantt'
 import { renderGanttSvg } from '../render'
 
 const tasks: GanttTask[] = [
-  { id: 1, text: 'Geneva DC', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'summary', open: true },
-  { id: 2, text: 'PowerEdge R740', start: new Date(2024, 0, 1), end: new Date(2027, 0, 1), type: 'task', parent: 1, color: '#0076ce' },
+  {
+    id: 1,
+    text: 'Geneva DC',
+    start: new Date(2024, 0, 1),
+    end: new Date(2027, 0, 1),
+    type: 'summary',
+    open: true,
+  },
+  {
+    id: 2,
+    text: 'PowerEdge R740',
+    start: new Date(2024, 0, 1),
+    end: new Date(2027, 0, 1),
+    type: 'task',
+    parent: 1,
+    color: '#0076ce',
+  },
 ]
 
 describe('renderGanttSvg', () => {

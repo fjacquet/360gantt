@@ -1,5 +1,5 @@
-import { isIncluded, toParsedAsset, toRawAsset, filterAssets } from '../assetFilter'
 import type { RawAsset } from '@/types/asset'
+import { filterAssets, isIncluded, toParsedAsset, toRawAsset } from '../assetFilter'
 import type { FieldMap } from '../headerResolver'
 
 const baseAsset: RawAsset = {
@@ -103,8 +103,8 @@ describe('toRawAsset', () => {
       'SERVICES STATUS': 'Active',
       'CONTRACT END DATE': 'March 15, 2028',
       'END OF STANDARD SUPPORT': '',
-      'CITY': 'Zurich',
-      'COUNTRY': 'Switzerland',
+      CITY: 'Zurich',
+      COUNTRY: 'Switzerland',
     }
     const raw = toRawAsset(row, fieldMap)
     expect(raw.assetId).toBe('X99')

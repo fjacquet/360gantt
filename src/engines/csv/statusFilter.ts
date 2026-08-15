@@ -1,5 +1,5 @@
 import type { ContractStatus, LocationGroup } from '@/types/asset'
-import { STATUS_ORDER, contractStatus } from '@/utils/colors'
+import { contractStatus, STATUS_ORDER } from '@/utils/colors'
 import { groupAssets } from './assetGrouper'
 
 /**
