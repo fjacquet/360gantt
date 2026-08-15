@@ -19,7 +19,9 @@ describe('assetStore status filter state', () => {
   })
 
   it('resets filters when new data is loaded', () => {
-    useAssetStore.getState().setFilters({ statuses: ['expired'], search: 'foo', locationIds: ['L9'] })
+    useAssetStore
+      .getState()
+      .setFilters({ statuses: ['expired'], search: 'foo', locationIds: ['L9'] })
     useAssetStore.getState().setData([], { tasks: [], links: [] }, 0, 'new.csv')
     const f = useAssetStore.getState().filters
     expect(f.statuses).toEqual(STATUS_ORDER)

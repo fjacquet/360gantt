@@ -1,6 +1,6 @@
-import { useTranslation } from 'react-i18next'
 import { useAssetStore } from '@store/assetStore'
 import { STATUS_COLORS, STATUS_ORDER } from '@utils/colors'
+import { useTranslation } from 'react-i18next'
 import type { ContractStatus } from '@/types/asset'
 
 export function FilterPanel() {
@@ -26,7 +26,10 @@ export function FilterPanel() {
   return (
     <div className="space-y-4">
       <div>
-        <label htmlFor="filter-search" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        <label
+          htmlFor="filter-search"
+          className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+        >
           {t('filter.search')}
         </label>
         <input
@@ -67,9 +70,7 @@ export function FilterPanel() {
               />
               <span className="truncate dark:text-gray-200">
                 {loc.locationName || loc.locationId}
-                {loc.city && (
-                  <span className="ml-1 text-xs text-gray-400">({loc.city})</span>
-                )}
+                {loc.city && <span className="ml-1 text-xs text-gray-400">({loc.city})</span>}
               </span>
             </label>
           ))}

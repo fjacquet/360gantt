@@ -1,7 +1,7 @@
-import { createElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
 import { SvgGantt } from '@components/outputs/gantt/SvgGantt'
 import type { ZoomScale } from '@store/assetStore'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import type { GanttTask } from '@/types/gantt'
 
 export interface RenderOptions {

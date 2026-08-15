@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
-import { Resvg, initWasm } from '@resvg/resvg-wasm'
+import { initWasm, Resvg } from '@resvg/resvg-wasm'
 
 const require = createRequire(import.meta.url)
 

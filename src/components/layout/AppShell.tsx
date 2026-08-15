@@ -1,8 +1,8 @@
+import { EmptyState } from '@components/outputs/EmptyState'
+import { GanttPanel } from '@components/outputs/GanttPanel'
+import { useAssetStore } from '@store/assetStore'
 import { useRef } from 'react'
 import { Header } from './Header'
-import { GanttPanel } from '@components/outputs/GanttPanel'
-import { EmptyState } from '@components/outputs/EmptyState'
-import { useAssetStore } from '@store/assetStore'
 
 export function AppShell() {
   const ganttRef = useRef<HTMLDivElement>(null)
@@ -15,11 +15,7 @@ export function AppShell() {
 
       {/* Main content — full width, must have explicit height for SVAR Gantt */}
       <main style={{ flex: 1, minHeight: 0, overflow: 'hidden', position: 'relative' }}>
-        {hasData ? (
-          <GanttPanel ref={ganttRef} />
-        ) : (
-          <EmptyState />
-        )}
+        {hasData ? <GanttPanel ref={ganttRef} /> : <EmptyState />}
       </main>
     </div>
   )

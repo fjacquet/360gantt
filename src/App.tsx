@@ -1,7 +1,7 @@
+import { AppShell } from '@components/layout/AppShell'
 import type { FallbackProps } from 'react-error-boundary'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Toaster } from 'sonner'
-import { AppShell } from '@components/layout/AppShell'
 
 function ErrorFallback({ error }: FallbackProps) {
   const message = error instanceof Error ? error.message : String(error)

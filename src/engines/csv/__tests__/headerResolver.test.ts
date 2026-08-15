@@ -1,4 +1,4 @@
-import { resolveHeaders, HARDWARE_VALUES, ACTIVE_VALUES } from '../headerResolver'
+import { ACTIVE_VALUES, HARDWARE_VALUES, resolveHeaders } from '../headerResolver'
 
 describe('resolveHeaders', () => {
   it('resolves English headers', () => {
