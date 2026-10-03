@@ -126,7 +126,7 @@ src/
 
 ## Docker (self-hosted)
 
-The Docker image is a multi-stage build: Node 22 Alpine to build, nginx Alpine to serve.
+The Docker image is a multi-stage build: Node 24 Alpine to build, nginx Alpine to serve.
 
 ```bash
 # Pull a specific version
