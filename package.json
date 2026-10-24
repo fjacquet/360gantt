@@ -1,6 +1,6 @@
 {
   "name": "@fjacquet/360gantt",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "Dell asset lifecycle Gantt visualizer — client-side, GitHub Pages ready",
   "private": false,
   "bin": {
@@ -52,7 +52,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.12",
+    "@biomejs/biome": "~2.5.15",
     "@tailwindcss/vite": "^4.2.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
