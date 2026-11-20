@@ -2,8 +2,9 @@ import { Buffer } from 'node:buffer'
 import { writeFile } from 'node:fs/promises'
 import { extname } from 'node:path'
 import { toMermaid } from '@engines/csv/mermaid'
+import { buildPptx } from '@engines/export/pptx'
 import { jsPDF } from 'jspdf'
-import PptxGenJS from 'pptxgenjs'
+import type { LocationGroup } from '@/types/asset'
 import type { GanttTask } from '@/types/gantt'
 import { svgToPng } from './rasterize'
 
@@ -30,6 +31,8 @@ export interface ExportInput {
   svg: string
   tasks: GanttTask[]
   outPath: string
+  groups: LocationGroup[]
+  sourceName: string
 }
 
 function toDataUri(png: Uint8Array): string {
@@ -53,7 +56,10 @@ export async function writeExport(format: ExportFormat, input: ExportInput): Pro
       await writePdf(input.svg, input.outPath)
       return
     case 'pptx':
-      await writePptx(input.svg, input.outPath)
+      await writeFile(
+        input.outPath,
+        Buffer.from(await buildPptx({ groups: input.groups, sourceName: input.sourceName })),
+      )
       return
   }
 }
@@ -70,16 +76,4 @@ async function writePdf(svg: string, outPath: string): Promise<void> {
   doc.addImage(toDataUri(data), 'PNG', 0, 0, w, h)
   const pdfBytes = doc.output('arraybuffer') as ArrayBuffer
   await writeFile(outPath, Buffer.from(pdfBytes))
-}
-
-async function writePptx(svg: string, outPath: string): Promise<void> {
-  const { data, width, height } = await svgToPng(svg)
-  const inchW = width / 2 / 96
-  const inchH = height / 2 / 96
-  const pptx = new PptxGenJS()
-  pptx.defineLayout({ name: 'GANTT', width: inchW, height: inchH })
-  pptx.layout = 'GANTT'
-  const slide = pptx.addSlide()
-  slide.addImage({ data: toDataUri(data), x: 0, y: 0, w: inchW, h: inchH })
-  await pptx.writeFile({ fileName: outPath })
 }

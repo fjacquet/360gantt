@@ -24,7 +24,7 @@
 - **Visual scale** — 50 % to 200 % canvas zoom (reflected in exports)
 - **Filter by location** and free-text product search
 - **Export to PDF** — custom page size, multi-page for tall charts
-- **Export to PPTX** — full-resolution image slide, sized to content
+- **Export to PPTX** — native-shape deck (title, overview, one slide per location) in the Midnight Executive style
 - **Dark mode** — auto-detected from browser preference
 - **i18n** — English and French UI, toggle in header
 - **Fully client-side** — no server, no data upload, runs in the browser

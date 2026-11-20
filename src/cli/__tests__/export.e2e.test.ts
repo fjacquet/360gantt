@@ -13,7 +13,7 @@ const FIXTURE = join(process.cwd(), 'tests', 'fixtures', 'sample-assets.csv')
 describe('cli export pipeline (fixture → every format)', () => {
   it('parses the fixture and renders all formats', async () => {
     const csv = await readFile(FIXTURE, 'utf8')
-    const { ganttData, totalAssets } = parseCsvToGantt(csv)
+    const { ganttData, locationGroups, totalAssets } = parseCsvToGantt(csv)
     expect(totalAssets).toBe(3) // three hardware/active rows; the software row is filtered
 
     const svg = renderGanttSvg(ganttData.tasks, ZOOM_PRESETS[1]?.scales ?? [])
@@ -21,8 +21,19 @@ describe('cli export pipeline (fixture → every format)', () => {
     try {
       for (const fmt of ['svg', 'png', 'pdf', 'pptx', 'mmd'] as const) {
         const out = join(dir, `out.${fmt}`)
-        await writeExport(fmt, { svg, tasks: ganttData.tasks, outPath: out })
+        await writeExport(fmt, {
+          svg,
+          tasks: ganttData.tasks,
+          outPath: out,
+          groups: locationGroups,
+          sourceName: 'sample-assets.csv',
+        })
         expect(existsSync(out)).toBe(true)
+        if (fmt === 'pptx') {
+          const buf = await readFile(out)
+          expect(buf.byteLength).toBeGreaterThan(0)
+          expect(Array.from(buf.subarray(0, 2))).toEqual([0x50, 0x4b]) // "PK" zip
+        }
       }
     } finally {
       await rm(dir, { recursive: true, force: true })
