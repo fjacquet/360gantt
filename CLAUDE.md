@@ -54,6 +54,7 @@ Pure functions, fully unit-tested, no React dependencies.
 - **dateParser** — handles two Dell date formats: `"July 23, 2026"` (US long form) and `"4yr, 3mo, 1d"` (age-from-today offset).
 - **assetGrouper** — groups `ParsedAsset[]` by `locationId → productName`, computes `daysRemaining`, sorts by `contractEnd` ascending.
 - **svarAdapter** — converts `LocationGroup[]` into the flat task array consumed by `SvgGantt` (SVAR-shaped; the name is historical). Integer IDs are assigned sequentially. Three-level hierarchy: location task (`parent` unset) → product group task (`parent=locationId`) → asset task (`parent=productId`). Bar colour set via `contractStatusColor`.
+- **export/pptx** (`src/engines/export/pptx/`) — `buildPptx({ groups, sourceName })` builds the native-shape PPTX deck (title, overview, one slide per location) from `LocationGroup[]`; used by `useExport` and the CLI.
 
 ### State (`src/store/assetStore.ts`)
 
@@ -70,7 +71,7 @@ Single Zustand store. Key slices:
 
 ### Export (`src/hooks/useExport.ts`)
 
-`captureElement` serialises the chart's `<svg>` (XMLSerializer → Blob → canvas at 2×) into a PNG data URL; PDF (jsPDF) and PPTX (pptxgenjs) exports build on it. No html2canvas.
+`captureElement` serialises the chart's `<svg>` (XMLSerializer → Blob → canvas at 2×) into a PNG data URL; PDF (jsPDF) export builds on it. No html2canvas. PPTX is not built from the captured image: it is generated natively by `src/engines/export/pptx/` (`buildPptx`, shared by the browser hook and the CLI).
 
 PDF page size is derived from the captured image at 1 CSS px = 1 pt (72 dpi), so a 12 px browser font renders as 12 pt in the PDF.
 

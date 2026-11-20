@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { ZOOM_PRESETS } from '@store/assetStore'
+import type { LocationGroup } from '@/types/asset'
 import type { GanttTask } from '@/types/gantt'
 import { formatFromPath, writeExport } from '../exporters'
 import { renderGanttSvg } from '../render'
@@ -36,6 +37,39 @@ const tasks: GanttTask[] = [
   },
 ]
 
+const asset = {
+  assetId: 'SVC-12345',
+  productName: 'PowerEdge R740',
+  locationId: 'L1',
+  locationName: 'Geneva DC',
+  city: 'Geneva',
+  country: 'CH',
+  installDate: new Date(2024, 0, 1),
+  contractEnd: new Date(2027, 0, 1),
+  daysRemaining: 400,
+  endOfSupport: null,
+  barEnd: new Date(2027, 0, 1),
+}
+
+const groups: LocationGroup[] = [
+  {
+    locationId: 'L1',
+    locationName: 'Geneva DC',
+    city: 'Geneva',
+    country: 'CH',
+    productGroups: [
+      {
+        productName: 'PowerEdge R740',
+        assets: [asset],
+        groupStart: asset.installDate,
+        groupEnd: asset.barEnd,
+      },
+    ],
+    locationStart: asset.installDate,
+    locationEnd: asset.barEnd,
+  },
+]
+
 describe('formatFromPath', () => {
   it('maps extensions to formats', () => {
     expect(formatFromPath('a.svg')).toBe('svg')
@@ -60,7 +94,7 @@ describe('writeExport', () => {
       const dir = await mkdtemp(join(tmpdir(), '360gantt-test-'))
       const out = join(dir, `out.${fmt}`)
       try {
-        await writeExport(fmt, { svg, tasks, outPath: out })
+        await writeExport(fmt, { svg, tasks, outPath: out, groups, sourceName: 'sample.csv' })
         expect(existsSync(out)).toBe(true)
         const buf = await readFile(out)
         expect(buf.byteLength).toBeGreaterThan(100)

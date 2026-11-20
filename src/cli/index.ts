@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { basename } from 'node:path'
 import process from 'node:process'
 import { parseCsvToGantt } from '@engines/csv/pipeline'
 import { ZOOM_PRESETS } from '@store/assetStore'
@@ -31,9 +32,15 @@ export function buildProgram(): Command {
       const preset = ZOOM_PRESETS[zoomIdx]
       if (!preset) throw new Error('Invalid zoom preset.')
       const csv = await readFile(input, 'utf8')
-      const { ganttData, parseErrors } = parseCsvToGantt(csv)
+      const { ganttData, locationGroups, parseErrors } = parseCsvToGantt(csv)
       const svg = renderGanttSvg(ganttData.tasks, preset.scales, { dark: opts.dark })
-      await writeExport(format, { svg, tasks: ganttData.tasks, outPath: opts.output })
+      await writeExport(format, {
+        svg,
+        tasks: ganttData.tasks,
+        outPath: opts.output,
+        groups: locationGroups,
+        sourceName: basename(input),
+      })
       process.stdout.write(`Wrote ${opts.output}\n`)
       if (parseErrors.length > 0)
         process.stderr.write(`Warning: ${parseErrors.length} CSV parse issue(s)\n`)
