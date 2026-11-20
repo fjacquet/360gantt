@@ -42,7 +42,7 @@ File drop/pick
   → assetGrouper     groupAssets(parsed)        → LocationGroup[]
   → svarAdapter      toGanttData(groups)        → GanttData { tasks, links }
   → assetStore       setData(...)               → Zustand state
-  → GanttPanel       reads tasks from store, renders SVAR Gantt
+  → GanttPanel       reads tasks from store, renders SvgGantt (custom SVG renderer)
 ```
 
 ### Engine layer (`src/engines/csv/`)
@@ -53,7 +53,7 @@ Pure functions, fully unit-tested, no React dependencies.
 - **assetFilter** — keeps `PRODUCT TYPE = HARDWARE` rows that have a parseable `CONTRACT END DATE` (falling back to `END OF STANDARD SUPPORT`), **regardless of `SERVICES STATUS`** — lapsed/`Ended` contracts are shown too. Multi-language hardware matching via `HARDWARE_VALUES`. Each `ParsedAsset` also carries `endOfSupport` and `barEnd` (= `contractEnd` while live, or `endOfSupport ?? contractEnd` once expired, i.e. `daysRemaining < 0`).
 - **dateParser** — handles two Dell date formats: `"July 23, 2026"` (US long form) and `"4yr, 3mo, 1d"` (age-from-today offset).
 - **assetGrouper** — groups `ParsedAsset[]` by `locationId → productName`, computes `daysRemaining`, sorts by `contractEnd` ascending.
-- **svarAdapter** — converts `LocationGroup[]` into the flat SVAR task array. Integer IDs are assigned sequentially. Three-level hierarchy: location task (`parent` unset) → product group task (`parent=locationId`) → asset task (`parent=productId`). Bar colour set via `contractStatusColor`.
+- **svarAdapter** — converts `LocationGroup[]` into the flat task array consumed by `SvgGantt` (SVAR-shaped; the name is historical). Integer IDs are assigned sequentially. Three-level hierarchy: location task (`parent` unset) → product group task (`parent=locationId`) → asset task (`parent=productId`). Bar colour set via `contractStatusColor`.
 
 ### State (`src/store/assetStore.ts`)
 
@@ -63,26 +63,20 @@ Single Zustand store. Key slices:
 - `zoomLevel` — index into `ZOOM_PRESETS` (time-axis: 5-year/Year/Quarter/Month)
 - `scaleIdx` — index into `SCALE_STEPS` (CSS zoom: 0.5× … 2.0×, default 1.0)
 
-### SVAR Gantt integration (`src/components/outputs/GanttPanel.tsx`)
+### Gantt rendering (`src/components/outputs/GanttPanel.tsx`, `gantt/SvgGantt.tsx`)
 
-- Must be wrapped in `<Willow>` or `<WillowDark>` theme — the chart is invisible without it.
-- SVAR CSS must be imported as a JS import in `main.tsx` (`import '@svar-ui/react-gantt/style.css'`), **not** inside `index.css`, because `@tailwindcss/vite` strips third-party `@import` statements.
-- CSS `zoom` property (from `scaleIdx`) is applied to the wrapper div — html2canvas respects it, so PDF/PPTX exports reflect the current visual scale automatically.
-- The `readonly` prop disables all editing. The `columns` prop is set to a single `text` column.
-- SVAR density tuning: `cellWidth={70}`, `cellHeight={28}`, `--wx-font-size: 12px`.
+- `GanttPanel` filters groups (locations, `filterGroupsByStatus`, `applySearchFilter`), then renders `<SvgGantt tasks scales dark />`. The time axis comes from `ZOOM_PRESETS[zoomLevel]`.
+- CSS `zoom` (from `scaleIdx`) is applied to the wrapper div.
 
 ### Export (`src/hooks/useExport.ts`)
 
-Before calling html2canvas, `expandForCapture` must:
-1. Reset `zoom` to `1` on the container (non-standard property — accessed via `el.style as any`).
-2. Set `overflow: visible; height: auto` on `.wx-gantt`, `.wx-chart`, `.wx-bars` so clipped rows/columns are rendered.
-3. Restore all styles after capture (always, even on error).
+`captureElement` serialises the chart's `<svg>` (XMLSerializer → Blob → canvas at 2×) into a PNG data URL; PDF (jsPDF) and PPTX (pptxgenjs) exports build on it. No html2canvas.
 
 PDF page size is derived from the captured image at 1 CSS px = 1 pt (72 dpi), so a 12 px browser font renders as 12 pt in the PDF.
 
 ### Layout constraint
 
-`AppShell` uses inline `style` props (not Tailwind classes) for the height chain so that the SVAR Gantt fills the available space. `GanttPanel` is positioned `absolute; inset: 0` inside the `<main>` element. Do not change this to Tailwind classes — the SVAR component requires an explicit pixel height from its container.
+`AppShell` uses inline `style` props for the height chain so the Gantt fills the available space. `GanttPanel` is positioned `absolute; inset: 0` inside the `<main>` element. Verify `SvgGantt` still sizes correctly before moving this to Tailwind classes.
 
 ### Docker / deployment
 
@@ -92,7 +86,7 @@ PDF page size is derived from the captured image at 1 CSS px = 1 pt (72 dpi), so
 
 ## Key constraints
 
-- **Coverage threshold** — Vitest enforces ≥ 75 % lines/functions/branches/statements on the engine layer. CI fails below this.
+- **Coverage threshold** — Vitest enforces ≥ 75 % lines/functions/branches/statements on `src/engines/` and `src/utils/`. CI fails below this.
 - **Biome** is the sole linter/formatter (no ESLint). Use `// biome-ignore lint/<rule>: <reason>` for suppressions, not ESLint comments.
-- **TypeScript strict mode** — `as any` is only used for the non-standard `CSSStyleDeclaration.zoom` property in `useExport.ts`.
+- **TypeScript strict mode** — avoid `as any`; if a suppression is unavoidable, use `// biome-ignore` with a reason.
 - Tests use `vitest` globals (no explicit imports for `describe`/`it`/`expect`).
