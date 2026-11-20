@@ -1,4 +1,6 @@
 import { toMermaid } from '@engines/csv/mermaid'
+import { selectGroups } from '@engines/csv/selectGroups'
+import { buildPptx } from '@engines/export/pptx'
 import { useAssetStore } from '@store/assetStore'
 import type { RefObject } from 'react'
 import { toast } from 'sonner'
@@ -102,26 +104,22 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
   }
 
   const exportPptx = async () => {
-    const el = ganttRef.current
-    if (!el) return
     const toastId = toast.loading('Generating PPTX\u2026')
     try {
-      const [{ default: PptxGenJS }, imgData] = await Promise.all([
-        import('pptxgenjs'),
-        captureElement(el),
-      ])
-      const img = await loadImage(imgData)
-
-      const pptx = new PptxGenJS()
-      const scale = 2
-      const inchW = img.naturalWidth / scale / 96
-      const inchH = img.naturalHeight / scale / 96
-      pptx.defineLayout({ name: 'GANTT', width: inchW, height: inchH })
-      pptx.layout = 'GANTT'
-
-      const slide = pptx.addSlide()
-      slide.addImage({ data: imgData, x: 0, y: 0, w: inchW, h: inchH })
-      await pptx.writeFile({ fileName: '360gantt-export.pptx' })
+      const { locationGroups, filters } = useAssetStore.getState()
+      const buf = await buildPptx({
+        groups: selectGroups(locationGroups, filters),
+        sourceName: '360gantt',
+      })
+      const blob = new Blob([buf], {
+        type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = '360gantt-export.pptx'
+      a.click()
+      URL.revokeObjectURL(url)
       toast.success('PPTX downloaded', { id: toastId })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Export failed'
