@@ -13,7 +13,10 @@ export function buildAxis(groups: LocationGroup[]): Axis {
   const maxDate = new Date(max)
   const maxYear = maxDate.getFullYear()
   // Round up to the next Jan 1; a date already on Jan 1 stays put.
-  const endYear = maxDate.getTime() === new Date(maxYear, 0, 1).getTime() ? maxYear : maxYear + 1
+  const endYear = Math.max(
+    startYear + 1, // keep a non-empty axis when every date is a lone Jan 1
+    maxDate.getTime() === new Date(maxYear, 0, 1).getTime() ? maxYear : maxYear + 1,
+  )
 
   const quarters = endYear - startYear <= 3
   const ticks: Axis['ticks'] = []
