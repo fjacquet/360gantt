@@ -1,6 +1,5 @@
 import { toMermaid } from '@engines/csv/mermaid'
 import { selectGroups } from '@engines/csv/selectGroups'
-import { buildPptx } from '@engines/export/pptx'
 import { useAssetStore } from '@store/assetStore'
 import type { RefObject } from 'react'
 import { toast } from 'sonner'
@@ -106,10 +105,11 @@ export function useExport(ganttRef: RefObject<HTMLDivElement | null>) {
   const exportPptx = async () => {
     const toastId = toast.loading('Generating PPTX\u2026')
     try {
-      const { locationGroups, filters } = useAssetStore.getState()
+      const { locationGroups, filters, fileName } = useAssetStore.getState()
+      const { buildPptx } = await import('@engines/export/pptx')
       const buf = await buildPptx({
         groups: selectGroups(locationGroups, filters),
-        sourceName: '360gantt',
+        sourceName: fileName ?? '360gantt',
       })
       const blob = new Blob([buf], {
         type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
