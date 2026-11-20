@@ -114,7 +114,7 @@ src/
 │   └── outputs/          # GanttPanel, EmptyState
 ├── hooks/
 │   ├── useCsvParse       # PapaParse + engines → Zustand store
-│   └── useExport         # html2canvas → jsPDF / PptxGenJS
+│   └── useExport         # SVG capture → PNG/PDF; PPTX via engines/export/pptx
 ├── store/
 │   └── assetStore        # Zustand: gantt data, filters, zoom, scale
 └── i18n/                 # EN + FR translations
