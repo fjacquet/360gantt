@@ -78,9 +78,10 @@
   },
   "overrides": {
     "esbuild": "^0.28.1",
-    "minimatch": "^10.2.6",
+    "minimatch": "^11.0.9",
     "undici": "^7.29.0",
     "fast-uri": "^3.1.5",
-    "image-size": "^2.0.4"
+    "image-size": "^2.0.4",
+    "glob": "^14.0.6"
   }
 }
